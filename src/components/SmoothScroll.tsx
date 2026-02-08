@@ -9,7 +9,8 @@ interface SmoothScrollProps {
 
 export default function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
-  const hasSnapped = useRef(false);
+  const heroSnapped = useRef(false);
+  const terminalSnapped = useRef(false);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -24,33 +25,61 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
 
     lenisRef.current = lenis;
 
-    // Snap to #about after scrolling past the hero
-    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
+    lenis.on("scroll", ({ scroll, direction }: { scroll: number; direction: number }) => {
       const aboutEl = document.getElementById("about");
-      if (!aboutEl || hasSnapped.current) return;
-
+      const terminalEl = document.getElementById("terminal");
       const heroHeight = window.innerHeight;
-      const aboutTop = aboutEl.getBoundingClientRect().top + scroll;
 
-      // Trigger snap once user scrolls past 40% of viewport — catch fast scrolls too
-      if (scroll > heroHeight * 0.4 && scroll < aboutTop + heroHeight) {
-        hasSnapped.current = true;
-        lenis.stop();
-        lenis.scrollTo(aboutEl, {
-          offset: 0,
-          duration: 1.0,
-          force: true,
-          onComplete: () => {
-            lenis.start();
-          },
-        });
+      // --- Snap 1: Hero → About ---
+      if (aboutEl && !heroSnapped.current && direction > 0) {
+        const aboutTop = aboutEl.getBoundingClientRect().top + scroll;
+        if (scroll > heroHeight * 0.4 && scroll < aboutTop + heroHeight) {
+          heroSnapped.current = true;
+          lenis.stop();
+          lenis.scrollTo(aboutEl, {
+            offset: 0,
+            duration: 1.0,
+            force: true,
+            onComplete: () => {
+              lenis.start();
+            },
+          });
+          return;
+        }
       }
-    });
 
-    // Reset snap when user scrolls back to top
-    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
-      if (hasSnapped.current && scroll < window.innerHeight * 0.2) {
-        hasSnapped.current = false;
+      // --- Snap 2: About/Dossier → Terminal ---
+      if (terminalEl && aboutEl && !terminalSnapped.current && heroSnapped.current && direction > 0) {
+        const aboutTop = aboutEl.getBoundingClientRect().top + scroll;
+        const aboutHeight = aboutEl.offsetHeight;
+        const terminalTop = terminalEl.getBoundingClientRect().top + scroll;
+
+        // Trigger when user has scrolled past 60% of the about section
+        if (scroll > aboutTop + aboutHeight * 0.6 && scroll < terminalTop + heroHeight * 0.5) {
+          terminalSnapped.current = true;
+          lenis.stop();
+          lenis.scrollTo(terminalEl, {
+            offset: 0,
+            duration: 1.0,
+            force: true,
+            onComplete: () => {
+              lenis.start();
+            },
+          });
+          return;
+        }
+      }
+
+      // --- Reset snaps when scrolling back ---
+      if (heroSnapped.current && scroll < heroHeight * 0.2) {
+        heroSnapped.current = false;
+        terminalSnapped.current = false;
+      }
+      if (terminalSnapped.current && aboutEl) {
+        const aboutTop = aboutEl.getBoundingClientRect().top + scroll;
+        if (scroll < aboutTop + aboutEl.offsetHeight * 0.3) {
+          terminalSnapped.current = false;
+        }
       }
     });
 

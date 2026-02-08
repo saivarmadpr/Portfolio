@@ -8,6 +8,7 @@ import Navigation from "@/components/Navigation";
 import BootSequence from "@/components/BootSequence";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
+import TerminalAutocomplete from "@/components/TerminalAutocomplete";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
 import Blog from "@/components/Blog";
@@ -42,6 +43,17 @@ export default function Home() {
             <Hero />
 
             <About />
+
+            {/* Terminal Arsenal — snap target */}
+            <section
+              id="terminal"
+              className="relative min-h-screen flex items-center justify-center px-6 md:px-12 lg:px-20 py-8"
+            >
+              <div className="w-full max-w-5xl">
+                <TerminalAutocomplete />
+              </div>
+            </section>
+
             <Experience />
             <Projects />
             <Blog />
