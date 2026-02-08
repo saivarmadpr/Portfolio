@@ -115,8 +115,8 @@ export default function Hero() {
             </span>
           </div>
 
-          {/* Headline — centered, each sentence on one line, auto-scales to fit */}
-          <h1 className="font-bold leading-[0.95] tracking-tight select-none whitespace-nowrap">
+          {/* Headline — left-aligned text, block centered on page */}
+          <h1 className="font-bold leading-[0.95] tracking-tight select-none whitespace-nowrap inline-block text-left">
             <div className="overflow-hidden">
               <span className="hero-word block text-[clamp(1.2rem,4vw,6.5rem)] text-charcoal text-shadow-heavy">
                 CURIOUS ENOUGH TO <span className="text-signal-red">BREAK.</span>

@@ -117,15 +117,14 @@ export default function About() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="photo-reveal mb-8 aspect-[4/5] bg-charcoal/5 border-2 border-charcoal flex items-center justify-center relative overflow-hidden"
+              className="photo-reveal mb-8 aspect-[4/5] bg-charcoal/5 border-2 border-charcoal relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-charcoal/[0.03] to-charcoal/[0.08]" />
-              <div className="text-center z-10">
-                <div className="text-6xl mb-4 opacity-20">&#9608;&#9608;&#9608;</div>
-                <div className="text-[10px] tracking-[0.4em] text-charcoal/45 uppercase">
-                  [PHOTO CLASSIFIED]
-                </div>
-              </div>
+              {/* Photo */}
+              <img
+                src="/photo.png"
+                alt="Sai Varma Dantuluri"
+                className="w-full h-full object-cover object-center grayscale hover:grayscale-0 transition-all duration-700"
+              />
               {/* Corner brackets */}
               <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-signal-red/40" />
               <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-signal-red/40" />

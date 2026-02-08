@@ -113,9 +113,9 @@ export default function Navigation() {
           >
             <button
               onClick={() => scrollTo("hero")}
-              className="text-xs tracking-[0.4em] text-ivory font-bold uppercase"
+              className="text-xs tracking-[0.3em] text-ivory font-bold uppercase"
             >
-              SAI<span className="text-signal-red">.</span>
+              SAI VARMA DANTULURI
             </button>
           </motion.div>
 
