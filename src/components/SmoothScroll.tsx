@@ -86,8 +86,15 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
         if (scroll > terminalTop + terminalHeight * 0.55 && scroll < terminalTop + terminalHeight + heroHeight * 0.5) {
           experienceSnapped.current = true;
           lenis.stop();
+
+          // Account for fixed header so the marquee bar sits below it
+          const header = document.querySelector("header");
+          const headerH = header
+            ? Math.ceil(header.getBoundingClientRect().height)
+            : 56;
+
           lenis.scrollTo(experienceEl, {
-            offset: 0,
+            offset: -headerH - 8,
             duration: 1.2,
             force: true,
             easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
