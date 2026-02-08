@@ -47,7 +47,7 @@ export default function Home() {
             {/* Terminal Arsenal — close-up product shot */}
             <section
               id="terminal"
-              className="relative min-h-[130vh] flex items-center justify-center overflow-hidden"
+              className="relative min-h-[130vh] flex items-start justify-center pt-[3vh]"
             >
               <div className="w-full max-w-5xl px-6 md:px-12 lg:px-20">
                 <TerminalAutocomplete />

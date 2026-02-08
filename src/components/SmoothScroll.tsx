@@ -58,12 +58,17 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
         if (scroll > aboutTop + aboutHeight * 0.6 && scroll < terminalTop + heroHeight * 0.5) {
           terminalSnapped.current = true;
           lenis.stop();
+          // Land so dossier bottom is still visible and terminal header is at ~30% viewport
           lenis.scrollTo(terminalEl, {
-            offset: 0,
-            duration: 1.0,
+            offset: -heroHeight * 0.28,
+            duration: 1.2,
             force: true,
+            easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
             onComplete: () => {
-              lenis.start();
+              // Lock scroll while terminal content dynamically loads
+              setTimeout(() => {
+                lenis.start();
+              }, 3500);
             },
           });
           return;

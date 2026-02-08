@@ -242,16 +242,16 @@ export default function TerminalAutocomplete() {
     offset: ["start end", "end start"],
   });
 
-  // Terminal rises into view and scales up to a close-up crop
-  const termScale = useTransform(scrollYProgress, [0.05, 0.4], [0.92, 1.18]);
-  const termY = useTransform(scrollYProgress, [0.05, 0.4], [160, 0]);
-  const termOpacity = useTransform(scrollYProgress, [0.03, 0.18], [0, 1]);
+  // Terminal rises into view with a subtle close-up feel
+  const termScale = useTransform(scrollYProgress, [0.08, 0.38], [0.92, 1.08]);
+  const termY = useTransform(scrollYProgress, [0.08, 0.38], [180, 0]);
+  const termOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1]);
 
-  // Subtle 3D tilt for depth
-  const termRotateX = useTransform(scrollYProgress, [0.05, 0.4], [6, 2]);
+  // Subtle 3D depth — mostly straight, just a hint of perspective
+  const termRotateX = useTransform(scrollYProgress, [0.08, 0.38], [3, 0]);
 
   return (
-    <div ref={showcaseRef} style={{ perspective: 1800 }}>
+    <div ref={showcaseRef} style={{ perspective: 1000 }}>
       <motion.div
         style={{
           scale: termScale,
@@ -262,40 +262,35 @@ export default function TerminalAutocomplete() {
           transformStyle: "preserve-3d",
         }}
       >
-        {/* Outer bezel — simulates a physical device frame */}
-        <div className="rounded-2xl p-[3px] bg-gradient-to-b from-[#444] via-[#222] to-[#111]">
+        {/* macOS-style window */}
         <motion.div
           ref={containerRef}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6 }}
-          className="bg-[#0a0a0a] relative overflow-hidden rounded-[14px]"
+          className="bg-[#1c1c1e] relative overflow-hidden rounded-xl"
           style={{
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.05), 0 25px 60px -12px rgba(0,0,0,0.5), 0 50px 100px -20px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.6)",
+              "0 0 0 0.5px rgba(255,255,255,0.1), 0 8px 40px rgba(0,0,0,0.55), 0 30px 80px -10px rgba(0,0,0,0.45), 0 50px 120px -20px rgba(0,0,0,0.3)",
           }}
         >
-          {/* Screen gloss / reflection overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none z-10 rounded-[14px]"
-            style={{
-              background:
-                "linear-gradient(165deg, rgba(255,255,255,0.04) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.015) 100%)",
-            }}
-          />
 
-      {/* Terminal header bar */}
-      <div className="flex items-center justify-between px-5 py-2.5 bg-gradient-to-b from-[#2a2a2a] to-[#1e1e1e] border-b border-[#000]">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f57] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(255,95,87,0.3)]" />
-          <div className="w-3 h-3 rounded-full bg-[#febc2e] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(254,188,46,0.3)]" />
-          <div className="w-3 h-3 rounded-full bg-[#28c840] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(40,200,64,0.3)]" />
+      {/* macOS title bar */}
+      <div className="flex items-center px-4 py-[10px] bg-[#2c2c2e] relative">
+        {/* Traffic lights */}
+        <div className="flex items-center gap-[7px]">
+          <div className="w-[12px] h-[12px] rounded-full bg-[#ff5f57] shadow-[inset_0_-0.5px_1px_rgba(0,0,0,0.2)]" />
+          <div className="w-[12px] h-[12px] rounded-full bg-[#febc2e] shadow-[inset_0_-0.5px_1px_rgba(0,0,0,0.2)]" />
+          <div className="w-[12px] h-[12px] rounded-full bg-[#28c840] shadow-[inset_0_-0.5px_1px_rgba(0,0,0,0.2)]" />
         </div>
-        <span className="text-[10px] tracking-[0.3em] text-[#666] uppercase font-mono">
-          sai@redteam — arsenal
+        {/* Centered window title — white */}
+        <span className="absolute left-1/2 -translate-x-1/2 text-[13px] text-white/90 font-medium font-mono tracking-wide">
+          SAI@REDTEAM — ARSENAL
         </span>
-        <span className="text-[10px] text-[#444] font-mono">zsh</span>
       </div>
+
+      {/* Subtle separator under title bar */}
+      <div className="h-px bg-black/40" />
 
       {/* Terminal body */}
       <div className="px-5 py-4 md:px-6 md:py-5 bg-[#0a0a0a]">
@@ -328,7 +323,6 @@ export default function TerminalAutocomplete() {
         </motion.div>
       </div>
     </motion.div>
-        </div>
       </motion.div>
     </div>
   );
