@@ -96,7 +96,7 @@ export default function Navigation() {
 
           {/* Side navigation dots */}
           <motion.nav
-            className="fixed right-6 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-end gap-6"
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-end gap-5 bg-ivory/70 backdrop-blur-md rounded-full px-2.5 py-4 border border-charcoal/[0.06] shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
@@ -105,13 +105,15 @@ export default function Navigation() {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="group flex items-center gap-3"
+                className="group relative flex items-center justify-end"
+                title={`${item.label} ${item.title}`}
               >
+                {/* Label tooltip on hover */}
                 <span
-                  className={`text-[10px] tracking-[0.3em] uppercase transition-all duration-300 ${
+                  className={`absolute right-6 whitespace-nowrap text-[9px] tracking-[0.25em] uppercase font-bold px-2.5 py-1 rounded-md transition-all duration-300 ${
                     activeSection === item.id
-                      ? "text-signal-red opacity-100"
-                      : "text-charcoal/0 group-hover:text-charcoal/40 group-hover:opacity-100 opacity-0"
+                      ? "text-ivory bg-signal-red opacity-100 translate-x-0"
+                      : "text-charcoal bg-ivory/90 border border-charcoal/10 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
                   }`}
                 >
                   {item.label} {item.title}
