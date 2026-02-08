@@ -1,12 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Marquee from "@/components/Marquee";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const PROFILE_STATS = [
   { label: "CALLSIGN", value: "SAI (DPR)" },
@@ -62,40 +58,9 @@ function renderBioHtml(text: string): string {
     );
 }
 
-
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.05 });
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".about-stat", {
-        scrollTrigger: {
-          trigger: ".about-stats-container",
-          start: "top 80%",
-        },
-        x: -30,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.08,
-        ease: "power3.out",
-      });
-
-      gsap.from(".metric-item", {
-        scrollTrigger: {
-          trigger: ".metrics-container",
-          start: "top 85%",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
 
   return (
     <section
