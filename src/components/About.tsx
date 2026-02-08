@@ -76,7 +76,7 @@ export default function About() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-16 md:py-20 px-6 md:px-12 lg:px-20"
+      className="relative py-12 md:py-16 px-6 md:px-12 lg:px-20"
       id="about"
     >
       {/* Background decoration */}
@@ -91,7 +91,7 @@ export default function About() {
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8 }}
-        className="mb-14"
+        className="mb-8"
       >
         <div className="flex items-center gap-4 mb-4">
           <span className="text-[10px] tracking-[0.5em] text-charcoal/45 uppercase">
@@ -99,25 +99,23 @@ export default function About() {
           </span>
           <div className="flex-1 h-px bg-charcoal/10" />
         </div>
-        <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-shadow-brutal leading-none">
-          THE
-          <br />
-          <span className="text-signal-red">DOSSIER</span>
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-shadow-heavy leading-none">
+          THE <span className="text-signal-red">DOSSIER</span>
         </h2>
       </motion.div>
 
       {/* Split layout */}
-      <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
+      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
         {/* Left: Sticky Profile Stats */}
-        <div className="lg:w-2/5">
-          <div className="lg:sticky lg:top-32 about-stats-container">
-            {/* Photo placeholder with scanlines */}
+        <div className="lg:w-[35%]">
+          <div className="lg:sticky lg:top-24 about-stats-container">
+            {/* Photo with scanlines */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="photo-reveal mb-8 aspect-[4/5] bg-charcoal/5 border-2 border-charcoal relative overflow-hidden"
+              className="photo-reveal mb-6 aspect-[3/4] bg-charcoal/5 border-2 border-charcoal relative overflow-hidden"
             >
               {/* Photo */}
               <img
@@ -133,7 +131,7 @@ export default function About() {
             </motion.div>
 
             {/* Stats card */}
-            <div className="border-2 border-charcoal p-6 relative">
+            <div className="border-2 border-charcoal p-4 relative">
               <div className="absolute -top-3 left-4 bg-ivory px-3">
                 <span className="text-[10px] tracking-[0.4em] text-charcoal/45 uppercase">
                   Personnel File
@@ -142,7 +140,7 @@ export default function About() {
               {PROFILE_STATS.map((stat, i) => (
                 <div
                   key={i}
-                  className="about-stat flex justify-between items-baseline py-2.5 border-b border-charcoal/[0.06] last:border-none"
+                  className="about-stat flex justify-between items-baseline py-1.5 border-b border-charcoal/[0.06] last:border-none"
                 >
                   <span className="text-[10px] tracking-[0.25em] text-charcoal/50 uppercase">
                     {stat.label}
@@ -163,7 +161,7 @@ export default function About() {
             </div>
 
             {/* Classification stamp */}
-            <div className="mt-6 flex justify-center">
+            <div className="mt-4 flex justify-center">
               <motion.span
                 className="inline-block border-2 border-signal-red text-signal-red px-6 py-2 text-[10px] tracking-[0.4em] font-bold"
                 style={{ rotate: -3 }}
@@ -184,10 +182,10 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, delay: i * 0.08 }}
-              className="mb-12"
+              className="mb-6"
             >
               <p
-                className="text-base md:text-lg lg:text-xl leading-[1.8] text-charcoal/70"
+                className="text-sm md:text-base leading-[1.7] text-charcoal/70"
                 dangerouslySetInnerHTML={{
                   __html: para.text.replace(
                     /<redacted>(.*?)<\/redacted>/g,
@@ -199,10 +197,10 @@ export default function About() {
           ))}
 
           {/* Metrics */}
-          <div className="metrics-container grid grid-cols-2 gap-8 mt-20 pt-12 border-t-2 border-charcoal/10">
+          <div className="metrics-container grid grid-cols-2 gap-6 mt-10 pt-8 border-t-2 border-charcoal/10">
             {METRICS.map((metric, i) => (
               <div key={i} className="metric-item">
-                <div className="text-3xl md:text-4xl font-bold text-charcoal text-shadow-heavy">
+                <div className="text-2xl md:text-3xl font-bold text-charcoal text-shadow-heavy">
                   {metric.value}
                 </div>
                 <div className="text-[10px] tracking-[0.3em] text-charcoal/50 uppercase mt-2">
@@ -218,7 +216,7 @@ export default function About() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-16 pt-8 border-t border-charcoal/10"
+            className="mt-8 pt-6 border-t border-charcoal/10"
           >
             <h3 className="text-[10px] tracking-[0.4em] text-charcoal/45 uppercase mb-6">
               Offensive Toolkit
