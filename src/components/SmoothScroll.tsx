@@ -11,6 +11,7 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const heroSnapped = useRef(false);
   const terminalSnapped = useRef(false);
+  const experienceSnapped = useRef(false);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -28,6 +29,7 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     lenis.on("scroll", ({ scroll, direction }: { scroll: number; direction: number }) => {
       const aboutEl = document.getElementById("about");
       const terminalEl = document.getElementById("terminal");
+      const experienceEl = document.getElementById("experience");
       const heroHeight = window.innerHeight;
 
       // --- Snap 1: Hero → About ---
@@ -75,15 +77,45 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
         }
       }
 
+      // --- Snap 3: Terminal → Experience ---
+      if (experienceEl && terminalEl && !experienceSnapped.current && terminalSnapped.current && direction > 0) {
+        const terminalTop = terminalEl.getBoundingClientRect().top + scroll;
+        const terminalHeight = terminalEl.offsetHeight;
+
+        // Trigger when user has scrolled past 55% of the terminal section
+        if (scroll > terminalTop + terminalHeight * 0.55 && scroll < terminalTop + terminalHeight + heroHeight * 0.5) {
+          experienceSnapped.current = true;
+          lenis.stop();
+          lenis.scrollTo(experienceEl, {
+            offset: 0,
+            duration: 1.2,
+            force: true,
+            easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+            onComplete: () => {
+              lenis.start();
+            },
+          });
+          return;
+        }
+      }
+
       // --- Reset snaps when scrolling back ---
       if (heroSnapped.current && scroll < heroHeight * 0.2) {
         heroSnapped.current = false;
         terminalSnapped.current = false;
+        experienceSnapped.current = false;
       }
       if (terminalSnapped.current && aboutEl) {
         const aboutTop = aboutEl.getBoundingClientRect().top + scroll;
         if (scroll < aboutTop + aboutEl.offsetHeight * 0.3) {
           terminalSnapped.current = false;
+          experienceSnapped.current = false;
+        }
+      }
+      if (experienceSnapped.current && terminalEl) {
+        const terminalTop = terminalEl.getBoundingClientRect().top + scroll;
+        if (scroll < terminalTop + terminalEl.offsetHeight * 0.3) {
+          experienceSnapped.current = false;
         }
       }
     });

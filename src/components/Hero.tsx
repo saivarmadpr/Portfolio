@@ -280,19 +280,19 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator — bottom center only */}
+        {/* Scroll indicator — bottom center */}
         <motion.div
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hero-meta"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 hero-meta"
           style={{ opacity: decorOpacity }}
         >
-          <span className="text-[10px] tracking-[0.5em] uppercase text-charcoal/45">
-            Scroll
+          <span className="text-[9px] tracking-[0.45em] uppercase text-charcoal/40 font-bold">
+            [ DECLASSIFY ↓ ]
           </span>
           <motion.div
-            className="w-px h-10 bg-gradient-to-b from-charcoal/40 to-transparent"
-            animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
+            className="w-px h-8 bg-gradient-to-b from-signal-red/50 to-transparent"
+            animate={{ scaleY: [0.2, 1, 0.2], opacity: [0.3, 0.8, 0.3] }}
             transition={{
-              duration: 2.5,
+              duration: 2,
               repeat: Infinity,
               ease: "easeInOut",
             }}
