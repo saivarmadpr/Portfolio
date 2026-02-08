@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Marquee from "@/components/Marquee";
 
 const PROFILE_STATS = [
@@ -60,7 +60,23 @@ function renderBioHtml(text: string): string {
 
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const marqueeRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.05 });
+
+  /* ── Scroll-driven marquee expansion: red dot → full-width bar ── */
+  const { scrollYProgress } = useScroll({
+    target: marqueeRef,
+    offset: ["start 1", "start 0.05"],
+  });
+
+  // Bar expands from a centre dot (~0.5% visible width) to full width
+  const marqueeScaleX = useTransform(scrollYProgress, [0.05, 0.9], [0.005, 1]);
+  // Round dot → flat rectangle
+  const marqueeBorderRadius = useTransform(scrollYProgress, [0.05, 0.5], [20, 0]);
+  // Dot fades in quickly
+  const marqueeOpacity = useTransform(scrollYProgress, [0.02, 0.12], [0, 1]);
+  // Scrolling text reveals only after the bar has expanded enough
+  const marqueeTextOpacity = useTransform(scrollYProgress, [0.6, 0.85], [0, 1]);
 
   return (
     <section
@@ -68,14 +84,25 @@ export default function About() {
       className="relative py-6 md:py-8 px-6 md:px-12 lg:px-20"
       id="about"
     >
-      {/* Marquee banner */}
-      <div className="mb-4 -mx-6 md:-mx-12 lg:-mx-20">
-        <Marquee
-          items={["PERSONNEL FILE", "CLASSIFIED DOSSIER", "THREAT ASSESSMENT", "SECURITY CLEARANCE", "OPERATOR PROFILE"]}
-          variant="red"
-          speed="normal"
-        />
-      </div>
+      {/* Marquee banner — expands from centre dot on scroll */}
+      <motion.div
+        ref={marqueeRef}
+        className="mb-4 -mx-6 md:-mx-12 lg:-mx-20 overflow-hidden"
+        style={{
+          scaleX: marqueeScaleX,
+          borderRadius: marqueeBorderRadius,
+          opacity: marqueeOpacity,
+          transformOrigin: "center center",
+        }}
+      >
+        <motion.div style={{ opacity: marqueeTextOpacity }}>
+          <Marquee
+            items={["PERSONNEL FILE", "CLASSIFIED DOSSIER", "THREAT ASSESSMENT", "SECURITY CLEARANCE", "OPERATOR PROFILE"]}
+            variant="red"
+            speed="normal"
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Section header */}
       <motion.div
