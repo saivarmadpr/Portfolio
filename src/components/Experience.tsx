@@ -1,27 +1,35 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useTransform, useInView, useMotionValue } from "framer-motion";
 import Marquee from "@/components/Marquee";
 
-interface ExperienceItem {
-  hash: string;
+/* ══════════════════════════════════════════════
+   DATA
+   ══════════════════════════════════════════════ */
+
+interface MissionItem {
+  missionCode: string;
+  index: string;
   date: string;
+  year: number;
   role: string;
   company: string;
-  branch: string;
+  status: "ACTIVE" | "COMPLETED";
   description: string;
   details: string[];
   techStack: string[];
 }
 
-const EXPERIENCE_DATA: ExperienceItem[] = [
+const MISSIONS: MissionItem[] = [
   {
-    hash: "a3f7c2d",
+    missionCode: "OP-2401",
+    index: "01",
     date: "2024 — Present",
+    year: 2024,
     role: "AI Red Team Engineer",
     company: "Independent",
-    branch: "main",
+    status: "ACTIVE",
     description: "Leading adversarial testing of LLM-based applications",
     details: [
       "Discovered 12+ critical vulnerabilities in production AI systems",
@@ -32,11 +40,13 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
     techStack: ["Python", "GPT-4", "Claude", "Langchain", "Custom Tools"],
   },
   {
-    hash: "e8b1f4a",
+    missionCode: "OP-2201",
+    index: "02",
     date: "2022 — 2024",
+    year: 2022,
     role: "Security Engineer",
     company: "Tech Company",
-    branch: "feature/security",
+    status: "COMPLETED",
     description: "Application security and penetration testing",
     details: [
       "Conducted 50+ penetration tests on web applications",
@@ -47,11 +57,13 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
     techStack: ["Burp Suite", "Python", "Go", "AWS", "Docker"],
   },
   {
-    hash: "c4d9e7b",
+    missionCode: "OP-2001",
+    index: "03",
     date: "2020 — 2022",
+    year: 2020,
     role: "Full Stack Developer",
     company: "Startup",
-    branch: "feature/platform",
+    status: "COMPLETED",
     description: "Building scalable web applications",
     details: [
       "Architected microservices handling 1M+ requests/day",
@@ -62,11 +74,13 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
     techStack: ["TypeScript", "React", "Node.js", "PostgreSQL", "K8s"],
   },
   {
-    hash: "f2a6b8c",
+    missionCode: "OP-1801",
+    index: "04",
     date: "2018 — 2020",
+    year: 2018,
     role: "Software Engineer",
     company: "Enterprise",
-    branch: "develop",
+    status: "COMPLETED",
     description: "Backend systems and API development",
     details: [
       "Developed RESTful APIs serving 500K+ users",
@@ -78,156 +92,477 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
   },
 ];
 
-function ExperienceCard({ item, index }: { item: ExperienceItem; index: number }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+const TOTAL = MISSIONS.length;
+const STEP = 1 / TOTAL;
+
+/* ══════════════════════════════════════════════
+   FOLDER CARD — 3D stacked classified briefing
+   ══════════════════════════════════════════════ */
+
+function FolderCard({
+  mission,
+  index,
+  scrollProgress,
+}: {
+  mission: MissionItem;
+  index: number;
+  scrollProgress: ReturnType<typeof useMotionValue>;
+}) {
+  const isLast = index === TOTAL - 1;
+
+  /* ── Build scroll-driven keyframes ──
+
+     Each STEP of scrollProgress corresponds to one card's lifecycle.
+     Within each step, the first half is a HOLD (active card is readable),
+     and the second half is a TRANSITION (active card exits, next rises).
+
+     For card at `index`:
+       - While buried: offset down by depth × 50px, scaled down, dimmed
+       - Holds at each depth until the card above starts its exit
+       - When it becomes active: y=0, scale=1, opacity=1
+       - When it exits: flies upward (y=-800), scales up, fades out      */
+
+  const yIn: number[] = [];
+  const yOut: number[] = [];
+  const sIn: number[] = [];
+  const sOut: number[] = [];
+  const oIn: number[] = [];
+  const oOut: number[] = [];
+  const rIn: number[] = [];
+  const rOut: number[] = [];
+
+  const DEPTH_OFFSET = 50; // px per depth level — visible peek below active card
+  const DEPTH_SCALE = 0.035; // scale reduction per depth level
+  const DEPTH_OPACITY = 0.15; // opacity reduction per depth level
+
+  // Phase 1: Depth states — hold at each depth, then transition when card above exits
+  for (let j = 0; j <= index; j++) {
+    const depth = index - j;
+    const stepStart = j * STEP;
+    const stepMid = stepStart + STEP * 0.5;
+
+    const depthY = depth * DEPTH_OFFSET;
+    const depthScale = 1 - depth * DEPTH_SCALE;
+    const depthOpacity = depth === 0 ? 1 : Math.max(0.55, 1 - depth * DEPTH_OPACITY);
+
+    // Arrive at this depth level
+    yIn.push(stepStart);
+    yOut.push(depthY);
+    sIn.push(stepStart);
+    sOut.push(depthScale);
+    oIn.push(stepStart);
+    oOut.push(depthOpacity);
+    rIn.push(stepStart);
+    rOut.push(0);
+
+    // Hold at this depth through first half of the step (while card above is readable)
+    if (depth > 0) {
+      yIn.push(stepMid);
+      yOut.push(depthY);
+      sIn.push(stepMid);
+      sOut.push(depthScale);
+      oIn.push(stepMid);
+      oOut.push(depthOpacity);
+      rIn.push(stepMid);
+      rOut.push(0);
+    }
+  }
+
+  // Phase 2: Active hold → exit upward (skip exit for last card)
+  if (!isLast) {
+    const holdEnd = index * STEP + STEP * 0.5;
+    const exitEnd = (index + 1) * STEP;
+
+    // Hold at fully visible active state
+    yIn.push(holdEnd);
+    yOut.push(0);
+    sIn.push(holdEnd);
+    sOut.push(1);
+    oIn.push(holdEnd);
+    oOut.push(1);
+    rIn.push(holdEnd);
+    rOut.push(0);
+
+    // Exit — fly upward like a page being turned
+    yIn.push(exitEnd);
+    yOut.push(-800);
+    sIn.push(exitEnd);
+    sOut.push(1.05);
+    oIn.push(exitEnd);
+    oOut.push(0);
+    rIn.push(exitEnd);
+    rOut.push(-5);
+  }
+
+  // Pad to progress = 1
+  if (yIn[yIn.length - 1] < 1) {
+    yIn.push(1);
+    yOut.push(yOut[yOut.length - 1]);
+    sIn.push(1);
+    sOut.push(sOut[sOut.length - 1]);
+    oIn.push(1);
+    oOut.push(oOut[oOut.length - 1]);
+    rIn.push(1);
+    rOut.push(rOut[rOut.length - 1]);
+  }
+
+  const y = useTransform(scrollProgress, yIn, yOut);
+  const scale = useTransform(scrollProgress, sIn, sOut);
+  const opacity = useTransform(scrollProgress, oIn, oOut);
+  const rotateX = useTransform(scrollProgress, rIn, rOut);
+  const rotateZ = useTransform(
+    scrollProgress,
+    rIn,
+    rOut.map((val) => val * 0.35)
+  );
+  const lift = useTransform(scrollProgress, yIn, yOut.map((val) => val * 0.5));
+  const boxShadow = useTransform(
+    scrollProgress,
+    yIn,
+    yOut.map((val) => {
+      const blur = Math.max(6, 18 - val * 0.02);
+      return `0 ${Math.round(blur)}px ${Math.round(
+        blur * 2
+      )}px rgba(0,0,0,0.12)`;
+    })
+  );
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="relative pl-16 md:pl-24 pb-20 last:pb-0 group"
+      className="absolute inset-x-0 top-0"
+      style={{
+        y,
+        scale,
+        opacity,
+        rotateX,
+        rotateZ,
+        z: lift,
+        zIndex: TOTAL - index,
+        transformOrigin: "top center",
+        transformStyle: "preserve-3d",
+        boxShadow,
+      }}
     >
-      {/* Timeline line */}
-      <div className="absolute left-[18px] md:left-[34px] top-0 bottom-0 w-px bg-charcoal/10 group-last:bg-gradient-to-b group-last:from-charcoal/10 group-last:to-transparent" />
-
-      {/* Commit dot - enhanced */}
-      <motion.div
-        className="absolute left-[12px] md:left-[28px] top-1"
-        whileHover={{ scale: 1.5 }}
-      >
-        <div className="w-3.5 h-3.5 border-2 border-charcoal/30 bg-ivory rounded-full group-hover:bg-signal-red group-hover:border-signal-red transition-all duration-300 relative">
-          <div className="absolute inset-0 rounded-full bg-signal-red/0 group-hover:bg-signal-red/20 group-hover:animate-ping" />
-        </div>
-      </motion.div>
-
-      {/* Content */}
-      <div
-        className="cursor-pointer group/card"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        {/* Git-style header */}
-        <div className="flex items-center gap-3 mb-2 flex-wrap">
-          <span className="text-[10px] font-mono text-phosphor-amber bg-charcoal/[0.04] px-2 py-0.5 border border-charcoal/[0.06]">
-            {item.hash}
-          </span>
-          <span className="text-[10px] text-charcoal/40 font-mono">
-            ({item.branch})
-          </span>
-          <span className="text-[10px] text-charcoal/45 ml-auto tracking-wider">
-            {item.date}
-          </span>
+      {/* ── Classified Folder Card ── */}
+      <div className="classified-folder relative bg-ivory border-2 border-charcoal/10 shadow-[0_8px_40px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+        {/* Folder tab — protrudes above like a real file tab */}
+        <div className="absolute -top-[28px] left-8 z-10">
+          <div className="bg-ivory px-5 py-1.5 rounded-t-md border border-b-0 border-charcoal/[0.08] shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
+            <span className="text-[10px] tracking-[0.25em] text-charcoal/50 font-mono uppercase">
+              {mission.missionCode} — {mission.date}
+            </span>
+          </div>
         </div>
 
-        <h3 className="text-2xl md:text-3xl font-bold text-shadow-heavy mt-3 group-hover/card:text-signal-red transition-colors duration-300">
-          {item.role}
-        </h3>
-        <p className="text-xs tracking-[0.2em] text-charcoal/50 mt-1 uppercase">
-          @ {item.company}
-        </p>
-        <p className="text-sm text-charcoal/60 mt-3 leading-relaxed">
-          {item.description}
-        </p>
+        {/* Red tape strip — top edge */}
+        <div className="h-[3px] bg-gradient-to-r from-signal-red/80 via-signal-red/50 to-signal-red/10" />
 
-        {/* Expand hint */}
-        <motion.span
-          className="text-[10px] text-charcoal/40 mt-3 inline-flex items-center gap-1 tracking-wider"
-          animate={{ x: isExpanded ? 0 : [0, 3, 0] }}
-          transition={{ duration: 1.5, repeat: isExpanded ? 0 : Infinity }}
-        >
-          {isExpanded ? "[-] collapse" : "[+] view details"}
-        </motion.span>
-      </div>
+        {/* Folder header bar */}
+        <div className="flex items-center justify-between px-5 md:px-8 py-3 border-b border-charcoal/[0.06] bg-charcoal/[0.015]">
+          <span className="text-[9px] tracking-[0.4em] text-charcoal/25 uppercase font-mono">
+            FIELD OPERATION — {mission.company}
+          </span>
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                mission.status === "ACTIVE"
+                  ? "bg-terminal-green animate-pulse"
+                  : "bg-charcoal/20"
+              }`}
+            />
+            <span
+              className={`text-[9px] tracking-[0.3em] font-bold uppercase ${
+                mission.status === "ACTIVE"
+                  ? "text-terminal-green"
+                  : "text-charcoal/30"
+              }`}
+            >
+              {mission.status}
+            </span>
+          </div>
+        </div>
 
-      {/* Expanded details */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="mt-6 ml-4 pl-5 border-l-2 border-signal-red/20">
-              <div className="text-[10px] tracking-[0.3em] text-charcoal/45 uppercase mb-4">
-                Impact / Achievements
-              </div>
-              <ul className="space-y-3">
-                {item.details.map((detail, i) => (
-                  <motion.li
+        {/* Card body */}
+        <div className="p-5 md:p-8 lg:p-10 relative">
+          {/* CLASSIFIED / COMPLETED stamp */}
+          <div className="absolute top-4 right-4 md:top-6 md:right-8 pointer-events-none select-none">
+            <div
+              className={`border-[3px] px-4 py-1.5 text-[10px] tracking-[0.35em] font-bold uppercase ${
+                mission.status === "ACTIVE"
+                  ? "border-terminal-green/50 text-terminal-green/60"
+                  : "border-signal-red/30 text-signal-red/40"
+              }`}
+              style={{ transform: "rotate(-12deg)" }}
+            >
+              {mission.status === "ACTIVE" ? "CLASSIFIED" : "COMPLETED"}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10">
+            {/* Left: Big index number */}
+            <div className="md:col-span-2 hidden md:block">
+              <span className="text-[80px] md:text-[110px] font-bold leading-none text-charcoal/[0.04] block select-none">
+                {mission.index}
+              </span>
+            </div>
+
+            {/* Right: Content */}
+            <div className="md:col-span-10">
+              <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-charcoal leading-[0.95]">
+                {mission.role}
+              </h3>
+              <p className="text-[10px] tracking-[0.3em] text-charcoal/40 uppercase mt-2">
+                @ {mission.company}
+              </p>
+              <p className="text-sm md:text-base text-charcoal/55 mt-4 leading-relaxed max-w-xl">
+                {mission.description}
+              </p>
+
+              {/* Mission details */}
+              <ul className="mt-5 space-y-2">
+                {mission.details.map((detail, i) => (
+                  <li
                     key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="text-sm text-charcoal/65 flex gap-3 leading-relaxed"
+                    className="text-sm text-charcoal/50 flex gap-3 leading-relaxed"
                   >
-                    <span className="text-terminal-green shrink-0 text-xs mt-0.5">&#9654;</span>
+                    <span className="text-signal-red/60 shrink-0 text-[10px] mt-1">
+                      ▸
+                    </span>
                     {detail}
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                {item.techStack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="text-[10px] px-2 py-1 bg-charcoal/[0.03] text-charcoal/40 border border-charcoal/[0.06] tracking-wider"
-                  >
-                    {tech}
-                  </span>
-                ))}
+              {/* Tech loadout */}
+              <div className="mt-6">
+                <span className="text-[9px] tracking-[0.35em] text-charcoal/25 uppercase block mb-2">
+                  Loadout
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {mission.techStack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="text-[10px] px-2.5 py-1 bg-charcoal/[0.04] text-charcoal/45 border border-charcoal/[0.08] tracking-wider uppercase"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Red tape accent — left edge */}
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-signal-red/25" />
+
+        {/* Bottom reference strip */}
+        <div className="px-5 md:px-8 py-2.5 border-t border-charcoal/[0.04]">
+          <span className="text-[8px] tracking-[0.3em] text-charcoal/15 font-mono uppercase">
+            REF/{mission.missionCode}/{mission.year} — PAGE{" "}
+            {mission.index} OF {String(TOTAL).padStart(2, "0")}
+          </span>
+        </div>
+      </div>
     </motion.div>
   );
 }
 
+/* ══════════════════════════════════════════════
+   MAIN SECTION
+   ══════════════════════════════════════════════ */
+
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.05 });
+  const marqueeRef = useRef<HTMLDivElement>(null);
+  const stackRef = useRef<HTMLDivElement>(null);
+  const headerInView = useInView(sectionRef, { once: true, amount: 0.02 });
+  const scrollProgress = useMotionValue(0);
+  const touchStartY = useRef<number | null>(null);
+  const bodyOverflow = useRef<string>("");
+  const bodyOverscroll = useRef<string>("");
+  const isLocked = useRef(false);
+  const hasSnapped = useRef(false);
+
+  const lockBodyScroll = () => {
+    if (isLocked.current) return;
+    if (typeof document === "undefined") return;
+    bodyOverflow.current = document.body.style.overflow;
+    bodyOverscroll.current = document.body.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    isLocked.current = true;
+  };
+
+  const unlockBodyScroll = () => {
+    if (!isLocked.current) return;
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = bodyOverflow.current;
+    document.body.style.overscrollBehavior = bodyOverscroll.current;
+    isLocked.current = false;
+  };
+
+  /* ── Effect: lock scroll when snapped + card peel ──
+     Lenis (SmoothScroll.tsx) handles the snap to this section.
+     Once the marquee is in view, we lock body scroll and let
+     wheel / touch / keyboard drive the card peel animation. */
+  useEffect(() => {
+    const clamp = (v: number) => Math.max(0, Math.min(1, v));
+
+    /* --- Detect when Lenis has snapped us here --- */
+    const handleScroll = () => {
+      if (hasSnapped.current || !marqueeRef.current) return;
+
+      const rect = marqueeRef.current.getBoundingClientRect();
+      const header = document.querySelector("header");
+      const headerH = header
+        ? Math.ceil(header.getBoundingClientRect().height)
+        : 56;
+
+      // Marquee is near the top of the viewport (just below header) → Lenis snapped us
+      if (rect.top > 0 && rect.top < headerH + 80) {
+        hasSnapped.current = true;
+        lockBodyScroll();
+      }
+    };
+
+    /* --- Wheel: drives card peel when locked --- */
+    const handleWheel = (event: WheelEvent) => {
+      if (!isLocked.current) return;
+
+      const delta = event.deltaY;
+      if (delta === 0) return;
+
+      const current = scrollProgress.get();
+
+      // At the end → unlock and let page scroll normally
+      if (current >= 1 && delta > 0) {
+        unlockBodyScroll();
+        return;
+      }
+
+      const next = clamp(current + delta / (window.innerHeight * TOTAL));
+      if (next !== current) scrollProgress.set(next);
+
+      if (event.cancelable) event.preventDefault();
+    };
+
+    /* --- Touch --- */
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!isLocked.current || touchStartY.current === null) return;
+
+      const currentY = event.touches[0]?.clientY ?? touchStartY.current;
+      const delta = touchStartY.current - currentY;
+      if (delta === 0) return;
+
+      const current = scrollProgress.get();
+      if (current >= 1 && delta > 0) {
+        unlockBodyScroll();
+        return;
+      }
+
+      scrollProgress.set(
+        clamp(current + delta / (window.innerHeight * TOTAL))
+      );
+      touchStartY.current = currentY;
+      if (event.cancelable) event.preventDefault();
+    };
+
+    /* --- Keyboard --- */
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isLocked.current) return;
+      const keys = ["ArrowDown", "ArrowUp", "PageDown", "PageUp", " "];
+      if (!keys.includes(event.key)) return;
+
+      const dir =
+        event.key === "ArrowUp" || event.key === "PageUp" ? -1 : 1;
+      const current = scrollProgress.get();
+      if (current >= 1 && dir > 0) {
+        unlockBodyScroll();
+        return;
+      }
+
+      scrollProgress.set(clamp(current + 0.06 * dir));
+      if (event.cancelable) event.preventDefault();
+    };
+
+    /* --- Progress watcher: unlock when last card revealed --- */
+    const unsubscribe = scrollProgress.on("change", (latest) => {
+      if (latest >= 1) {
+        unlockBodyScroll();
+      }
+    });
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("keydown", handleKeyDown, { passive: false });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("keydown", handleKeyDown);
+      unsubscribe();
+      unlockBodyScroll();
+    };
+  }, [scrollProgress]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-16 md:py-20 px-6 md:px-12 lg:px-20"
-      id="experience"
-    >
+    <section ref={sectionRef} className="relative" id="experience">
       {/* Marquee banner */}
-      <div className="mb-4 -mx-6 md:-mx-12 lg:-mx-20">
+      <div ref={marqueeRef}>
         <Marquee
-          items={["COMMIT HISTORY", "OPERATION TIMELINE", "DEPLOYMENT LOG", "MISSION RECORDS", "INCIDENT REPORTS"]}
+          items={[
+            "MISSION LOG",
+            "FIELD OPERATIONS",
+            "CAMPAIGN RECORD",
+            "DEPLOYMENT HISTORY",
+            "THREAT RESPONSE",
+          ]}
           variant="default"
           speed="slow"
         />
       </div>
 
       {/* Section header */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8 }}
-        className="mb-14"
-      >
-        <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-shadow-brutal leading-none">
-          GIT
-          <br />
-          <span className="text-signal-red">LOG</span>
-        </h2>
-        <p className="text-xs text-charcoal/45 mt-6 font-mono tracking-wider">
-          $ git log --oneline --graph --all --decorate
-        </p>
-      </motion.div>
+      <div className="px-6 md:px-12 lg:px-20 pt-14 pb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={headerInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-shadow-brutal leading-none">
+            <span>MISSION </span>
+            <span className="text-signal-red">LOG</span>
+          </h2>
+          <p className="text-xs text-charcoal/40 mt-5 font-mono tracking-wider">
+            $ cat /ops/missions.log --all --chronological
+          </p>
+        </motion.div>
+      </div>
 
-      {/* Timeline */}
-      <div className="max-w-3xl">
-        {EXPERIENCE_DATA.map((item, index) => (
-          <ExperienceCard key={item.hash} item={item} index={index} />
-        ))}
+      {/* ── Card stack scroll area ── */}
+      <div ref={stackRef} className="relative h-screen overflow-hidden">
+        <div
+          className="relative mx-auto max-w-5xl px-6 md:px-12 pt-12"
+          style={{ perspective: "1200px" }}
+        >
+          {MISSIONS.map((mission, i) => (
+            <FolderCard
+              key={mission.missionCode}
+              mission={mission}
+              index={i}
+              scrollProgress={scrollProgress}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

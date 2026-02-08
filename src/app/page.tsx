@@ -34,7 +34,7 @@ export default function Home() {
           <Navigation />
 
           <motion.main
-            className="bg-ivory min-h-screen noise-overlay relative overflow-hidden"
+            className="bg-ivory min-h-screen noise-overlay relative overflow-x-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}

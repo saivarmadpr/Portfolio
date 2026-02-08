@@ -461,6 +461,15 @@ body {
 }
 
 /* ==============================
+   CLASSIFIED FOLDER
+   ============================== */
+
+.classified-folder {
+  position: relative;
+  overflow: visible;
+}
+
+/* ==============================
    HORIZONTAL SCROLL
    ============================== */
 
