@@ -44,12 +44,12 @@ export default function Home() {
 
             <About />
 
-            {/* Terminal Arsenal — snap target */}
+            {/* Terminal Arsenal — close-up product shot */}
             <section
               id="terminal"
-              className="relative min-h-screen flex items-center justify-center px-6 md:px-12 lg:px-20 py-8"
+              className="relative min-h-[130vh] flex items-center justify-center overflow-hidden"
             >
-              <div className="w-full max-w-5xl">
+              <div className="w-full max-w-5xl px-6 md:px-12 lg:px-20">
                 <TerminalAutocomplete />
               </div>
             </section>

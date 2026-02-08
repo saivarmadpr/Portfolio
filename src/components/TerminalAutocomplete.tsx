@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 interface Category {
   label: string;
@@ -233,16 +233,37 @@ function TerminalBlock({ category, index }: { category: Category; index: number 
 
 export default function TerminalAutocomplete() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const showcaseRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.1 });
 
+  /* ── Close-up product shot entrance ── */
+  const { scrollYProgress } = useScroll({
+    target: showcaseRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Terminal rises into view and scales up to a close-up crop
+  const termScale = useTransform(scrollYProgress, [0.05, 0.4], [0.92, 1.18]);
+  const termY = useTransform(scrollYProgress, [0.05, 0.4], [160, 0]);
+  const termOpacity = useTransform(scrollYProgress, [0.03, 0.18], [0, 1]);
+
   return (
-    <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0 }}
-      animate={isInView ? { opacity: 1 } : {}}
-      transition={{ duration: 0.6 }}
-      className="border-2 border-charcoal bg-[#0a0a0a] relative overflow-hidden rounded-lg shadow-2xl"
-    >
+    <div ref={showcaseRef}>
+      <motion.div
+        style={{
+          scale: termScale,
+          y: termY,
+          opacity: termOpacity,
+          transformOrigin: "center center",
+        }}
+      >
+        <motion.div
+          ref={containerRef}
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6 }}
+          className="border-2 border-charcoal bg-[#0a0a0a] relative overflow-hidden rounded-lg shadow-2xl"
+        >
       {/* Terminal header bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[#1a1a1a] border-b border-[#333]">
         <div className="flex items-center gap-2">
@@ -287,5 +308,7 @@ export default function TerminalAutocomplete() {
         </motion.div>
       </div>
     </motion.div>
+      </motion.div>
+    </div>
   );
 }
