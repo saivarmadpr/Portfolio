@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -14,6 +14,30 @@ const ROLES = [
   "Adversarial ML Engineer",
 ];
 
+/* ── Split a string into per-character <span> elements ── */
+function CharSplit({
+  text,
+  className = "",
+}: {
+  text: string;
+  className?: string;
+}) {
+  return (
+    <>
+      {text.split("").map((char, i) => (
+        <span
+          key={i}
+          className={`hero-char inline-block ${className} ${
+            char === " " ? "w-[0.3em]" : ""
+          }`}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
+    </>
+  );
+}
+
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [roleIndex, setRoleIndex] = useState(0);
@@ -25,13 +49,42 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
+  /* ── Shared scroll transforms ── */
   const headlineScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.4]);
   const headlineOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0]);
-  const headlineY = useTransform(scrollYProgress, [0, 0.6], [0, -120]);
   const subtitleOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
   const decorOpacity = useTransform(scrollYProgress, [0.05, 0.35], [1, 0]);
 
-  // Typing effect for roles
+  /* ── Enhancement 5: Cinematic split-apart exit ── */
+  // Line 1 — drifts up-left, rotates counter-clockwise, scales up, blurs
+  const line1X = useTransform(scrollYProgress, [0.05, 0.55], [0, -150]);
+  const line1Y = useTransform(scrollYProgress, [0.05, 0.55], [0, -100]);
+  const line1Rotate = useTransform(scrollYProgress, [0.05, 0.55], [0, -5]);
+  const line1Scale = useTransform(scrollYProgress, [0.05, 0.55], [1, 1.08]);
+  const line1BlurVal = useTransform(scrollYProgress, [0.15, 0.5], [0, 8]);
+  const line1Filter = useMotionTemplate`blur(${line1BlurVal}px)`;
+
+  // Line 2 — drifts down-right, rotates clockwise, scales up, blurs
+  const line2X = useTransform(scrollYProgress, [0.05, 0.55], [0, 150]);
+  const line2Y = useTransform(scrollYProgress, [0.05, 0.55], [0, 100]);
+  const line2Rotate = useTransform(scrollYProgress, [0.05, 0.55], [0, 5]);
+  const line2Scale = useTransform(scrollYProgress, [0.05, 0.55], [1, 1.08]);
+  const line2BlurVal = useTransform(scrollYProgress, [0.15, 0.5], [0, 8]);
+  const line2Filter = useMotionTemplate`blur(${line2BlurVal}px)`;
+
+  /* ── Enhancement 1: Mouse-following spotlight ── */
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      e.currentTarget.style.setProperty("--mx", `${x}%`);
+      e.currentTarget.style.setProperty("--my", `${y}%`);
+    },
+    []
+  );
+
+  /* ── Typing effect for roles ── */
   useEffect(() => {
     const currentRole = ROLES[roleIndex];
     let charIndex = 0;
@@ -64,25 +117,71 @@ export default function Hero() {
     return () => clearInterval(timeout);
   }, [roleIndex, isTyping]);
 
-  // GSAP word animation on load
+  /* ── Enhancements 2 + 3: Character reveal + glitch flash ── */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".hero-word", {
+      // Per-character staggered reveal — cascading wave
+      gsap.from(".hero-char", {
         y: 80,
         opacity: 0,
-        duration: 0.9,
-        stagger: 0.14,
+        duration: 0.6,
+        stagger: 0.025,
         ease: "power4.out",
         delay: 0.2,
       });
 
+      // Enhancement 3: Glitch flash on BREAK. and FIX. after chars land
+      // 48 total chars × 0.025 stagger + 0.2 delay + 0.6 duration ≈ 2.0s
+      gsap.delayedCall(2.0, () => {
+        const glitchChars = containerRef.current?.querySelectorAll(
+          ".hero-glitch-target .hero-char"
+        );
+        if (!glitchChars?.length) return;
+
+        const tl = gsap.timeline();
+        // Quick jitter with colored ghost offsets
+        tl.to(glitchChars, {
+          x: () => (Math.random() - 0.5) * 5,
+          textShadow: "-2px 0 #39FF14, 2px 0 #FFB000",
+          duration: 0.06,
+          stagger: { each: 0.015, from: "random" },
+        })
+          .to(glitchChars, {
+            x: () => (Math.random() - 0.5) * 4,
+            textShadow: "2px 0 #39FF14, -2px 0 #FFB000",
+            duration: 0.06,
+            stagger: { each: 0.015, from: "random" },
+          })
+          .to(glitchChars, {
+            x: () => (Math.random() - 0.5) * 3,
+            textShadow: "-1px 0 #39FF14, 1px 0 #FFB000",
+            duration: 0.05,
+            stagger: { each: 0.01, from: "random" },
+          })
+          // Settle: snap back to position with brief red glow
+          .to(glitchChars, {
+            x: 0,
+            textShadow:
+              "0 0 10px rgba(255,59,48,0.6), 0 0 25px rgba(255,59,48,0.25)",
+            duration: 0.15,
+            stagger: { each: 0.008, from: "start" },
+          })
+          // Fade glow out
+          .to(glitchChars, {
+            textShadow: "none",
+            duration: 0.6,
+            delay: 0.4,
+          });
+      });
+
+      // Meta elements fade in after headline
       gsap.from(".hero-meta", {
         y: 15,
         opacity: 0,
         duration: 0.7,
         stagger: 0.1,
         ease: "power3.out",
-        delay: 1.0,
+        delay: 2.2,
       });
     }, containerRef);
 
@@ -90,14 +189,22 @@ export default function Hero() {
   }, []);
 
   return (
-    <section
-      ref={containerRef}
-      className="relative min-h-[120vh]"
-      id="hero"
-    >
-      <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
+    <section ref={containerRef} className="relative min-h-[120vh]" id="hero">
+      <div
+        className="group sticky top-0 h-screen flex flex-col justify-center overflow-hidden"
+        onMouseMove={handleMouseMove}
+      >
         {/* Subtle radial fade at edges */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#F5F4EB_85%)]" />
+
+        {/* Enhancement 1: Mouse-following spotlight — red ambient glow */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[1] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+          style={{
+            background:
+              "radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%), rgba(255,59,48,0.06), transparent 40%)",
+          }}
+        />
 
         {/* Main content — centered */}
         <motion.div
@@ -105,7 +212,6 @@ export default function Hero() {
           style={{
             scale: headlineScale,
             opacity: headlineOpacity,
-            y: headlineY,
           }}
         >
           {/* Small label above headline */}
@@ -115,18 +221,45 @@ export default function Hero() {
             </span>
           </div>
 
-          {/* Headline — left-aligned text, block centered on page */}
+          {/* Enhancement 2 + 5: Per-character headline with split-apart exit */}
           <h1 className="font-bold leading-[0.95] tracking-tight select-none whitespace-nowrap inline-block text-left">
-            <div className="overflow-hidden">
-              <span className="hero-word block text-[clamp(1.2rem,4vw,6.5rem)] text-charcoal text-shadow-heavy">
-                CURIOUS ENOUGH TO <span className="text-signal-red">BREAK.</span>
+            {/* Line 1 — drifts up-left, rotates, scales, blurs on scroll */}
+            <motion.div
+              className="overflow-hidden"
+              style={{
+                x: line1X,
+                y: line1Y,
+                rotate: line1Rotate,
+                scale: line1Scale,
+                filter: line1Filter,
+              }}
+            >
+              <span className="block text-[clamp(1.2rem,4vw,6.5rem)] text-charcoal text-shadow-heavy">
+                <CharSplit text="CURIOUS ENOUGH TO " />
+                <span className="text-signal-red hero-glitch-target inline-block">
+                  <CharSplit text="BREAK." className="text-signal-red" />
+                </span>
               </span>
-            </div>
-            <div className="overflow-hidden mt-1 md:mt-3">
-              <span className="hero-word block text-[clamp(1.2rem,4vw,6.5rem)] text-charcoal text-shadow-heavy">
-                CAREFUL ENOUGH TO <span className="text-signal-red">FIX.</span>
+            </motion.div>
+
+            {/* Line 2 — drifts down-right, rotates, scales, blurs on scroll */}
+            <motion.div
+              className="overflow-hidden mt-1 md:mt-3"
+              style={{
+                x: line2X,
+                y: line2Y,
+                rotate: line2Rotate,
+                scale: line2Scale,
+                filter: line2Filter,
+              }}
+            >
+              <span className="block text-[clamp(1.2rem,4vw,6.5rem)] text-charcoal text-shadow-heavy">
+                <CharSplit text="CAREFUL ENOUGH TO " />
+                <span className="text-signal-red hero-glitch-target inline-block">
+                  <CharSplit text="FIX." className="text-signal-red" />
+                </span>
               </span>
-            </div>
+            </motion.div>
           </h1>
 
           {/* Divider line — centered */}
@@ -158,7 +291,11 @@ export default function Hero() {
           <motion.div
             className="w-px h-10 bg-gradient-to-b from-charcoal/40 to-transparent"
             animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
         </motion.div>
       </div>
