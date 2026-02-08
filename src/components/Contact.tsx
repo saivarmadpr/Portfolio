@@ -2,6 +2,7 @@
 
 import { useRef, useState, FormEvent } from "react";
 import { motion, useInView } from "framer-motion";
+import Marquee from "@/components/Marquee";
 
 export default function Contact() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -37,6 +38,15 @@ export default function Contact() {
     >
 
       <div className="w-full max-w-3xl mx-auto relative z-10">
+        {/* Marquee banner */}
+        <div className="mb-4 -mx-6 md:-mx-12 lg:-mx-20">
+          <Marquee
+            items={["OPEN CHANNEL", "SECURE TRANSMISSION", "ENCRYPTED COMMS", "INITIATE CONTACT", "SIGNAL READY"]}
+            variant="default"
+            speed="normal"
+          />
+        </div>
+
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -44,12 +54,6 @@ export default function Contact() {
           transition={{ duration: 0.8 }}
           className="mb-12"
         >
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-[10px] tracking-[0.5em] text-charcoal/45 uppercase">
-              Section 06
-            </span>
-            <div className="flex-1 h-px bg-charcoal/10" />
-          </div>
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-shadow-brutal leading-none">
             START
             <br />

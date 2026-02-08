@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import Marquee from "@/components/Marquee";
 
 interface ExperienceItem {
   hash: string;
@@ -196,6 +197,15 @@ export default function Experience() {
       className="relative py-16 md:py-20 px-6 md:px-12 lg:px-20"
       id="experience"
     >
+      {/* Marquee banner */}
+      <div className="mb-4 -mx-6 md:-mx-12 lg:-mx-20">
+        <Marquee
+          items={["COMMIT HISTORY", "OPERATION TIMELINE", "DEPLOYMENT LOG", "MISSION RECORDS", "INCIDENT REPORTS"]}
+          variant="default"
+          speed="slow"
+        />
+      </div>
+
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -203,12 +213,6 @@ export default function Experience() {
         transition={{ duration: 0.8 }}
         className="mb-14"
       >
-        <div className="flex items-center gap-4 mb-4">
-          <span className="text-[10px] tracking-[0.5em] text-charcoal/45 uppercase">
-            Section 03
-          </span>
-          <div className="flex-1 h-px bg-charcoal/10" />
-        </div>
         <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-shadow-brutal leading-none">
           GIT
           <br />

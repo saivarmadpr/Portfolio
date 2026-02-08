@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import Marquee from "@/components/Marquee";
 
 interface Project {
   id: string;
@@ -179,6 +180,15 @@ export default function Projects() {
       className="relative py-16 md:py-20"
       id="projects"
     >
+      {/* Marquee banner */}
+      <div className="mb-4">
+        <Marquee
+          items={["OFFENSIVE TOOLS", "EXPLOIT FRAMEWORKS", "PROOF OF CONCEPT", "WEAPONIZED CODE", "FIELD TESTED"]}
+          variant="red"
+          speed="fast"
+        />
+      </div>
+
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -186,12 +196,6 @@ export default function Projects() {
         transition={{ duration: 0.8 }}
         className="mb-12 px-6 md:px-12 lg:px-20"
       >
-        <div className="flex items-center gap-4 mb-4">
-          <span className="text-[10px] tracking-[0.5em] text-charcoal/45 uppercase">
-            Section 04
-          </span>
-          <div className="flex-1 h-px bg-charcoal/10" />
-        </div>
         <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-shadow-brutal leading-none">
           THE
           <br />

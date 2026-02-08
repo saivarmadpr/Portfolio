@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import Marquee from "@/components/Marquee";
 
 interface BlogPost {
   id: string;
@@ -175,6 +176,15 @@ export default function Blog() {
         className="relative py-16 md:py-20 px-6 md:px-12 lg:px-20"
         id="blog"
       >
+        {/* Marquee banner */}
+        <div className="mb-4 -mx-6 md:-mx-12 lg:-mx-20">
+          <Marquee
+            items={["FIELD NOTES", "THREAT INTEL", "AFTER ACTION REPORT", "VULNERABILITY DISCLOSURE", "RECON DATA"]}
+            variant="green"
+            speed="normal"
+          />
+        </div>
+
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -182,10 +192,7 @@ export default function Blog() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <span className="text-xs tracking-[0.5em] text-charcoal/40 uppercase">
-            Section 05
-          </span>
-          <h2 className="text-4xl md:text-6xl font-bold text-shadow-heavy mt-2">
+          <h2 className="text-4xl md:text-6xl font-bold text-shadow-heavy">
             FIELD REPORTS
           </h2>
           <div className="w-20 h-0.5 bg-signal-red mt-4" />

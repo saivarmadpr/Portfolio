@@ -157,23 +157,197 @@ body {
 }
 
 /* ==============================
-   REDACTED TEXT
+   BIO TEXT EFFECTS
    ============================== */
 
-.redacted {
+/* 1. GLITCH FLICKER — scrambles on hover */
+.fx-glitch {
+  position: relative;
+  display: inline-block;
+  color: var(--signal-red);
+  font-weight: 700;
+  padding: 0 2px;
+}
+
+.fx-glitch::before,
+.fx-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--signal-red);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fx-glitch:hover {
+  animation: fx-glitch-shake 0.3s steps(1) infinite;
+}
+
+.fx-glitch:hover::before {
+  opacity: 0.8;
+  left: 2px;
+  color: var(--terminal-green);
+  text-shadow: -1px 0 var(--terminal-green);
+  animation: fx-glitch-clip 0.3s steps(2) infinite;
+}
+
+.fx-glitch:hover::after {
+  opacity: 0.8;
+  left: -2px;
+  color: var(--phosphor-amber);
+  text-shadow: 1px 0 var(--phosphor-amber);
+  animation: fx-glitch-clip 0.2s steps(3) infinite reverse;
+}
+
+@keyframes fx-glitch-clip {
+  0% { clip-path: inset(0 0 80% 0); }
+  20% { clip-path: inset(60% 0 0 0); }
+  40% { clip-path: inset(20% 0 40% 0); }
+  60% { clip-path: inset(80% 0 5% 0); }
+  80% { clip-path: inset(10% 0 60% 0); }
+  100% { clip-path: inset(50% 0 20% 0); }
+}
+
+@keyframes fx-glitch-shake {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0); }
+}
+
+/* 2. REDACT — black bar that reveals on hover */
+.fx-redact {
   position: relative;
   display: inline;
   color: transparent;
   background: var(--charcoal);
   padding: 0 4px;
+  border-radius: 1px;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   user-select: none;
-  border-radius: 1px;
 }
 
-.redacted:hover {
+.fx-redact:hover {
   color: var(--signal-red);
   background: rgba(255, 59, 48, 0.08);
+}
+
+/* 3. TYPE — typewriter cursor pulse */
+.fx-type {
+  position: relative;
+  display: inline;
+  color: var(--charcoal);
+  font-weight: 700;
+  border-right: 2px solid var(--terminal-green);
+  padding-right: 3px;
+  animation: fx-type-blink 0.8s step-end infinite;
+}
+
+@keyframes fx-type-blink {
+  0%, 100% { border-right-color: var(--terminal-green); }
+  50% { border-right-color: transparent; }
+}
+
+/* 4. HIGHLIGHT — amber marker highlight */
+.fx-highlight {
+  display: inline;
+  background: linear-gradient(
+    180deg,
+    transparent 55%,
+    rgba(255, 176, 0, 0.25) 55%,
+    rgba(255, 176, 0, 0.25) 90%,
+    transparent 90%
+  );
+  color: var(--charcoal);
+  font-weight: 700;
+  padding: 0 2px;
+  transition: all 0.3s ease;
+}
+
+.fx-highlight:hover {
+  background: linear-gradient(
+    180deg,
+    transparent 35%,
+    rgba(255, 176, 0, 0.35) 35%,
+    rgba(255, 176, 0, 0.35) 90%,
+    transparent 90%
+  );
+}
+
+/* 5. RED GLOW — pulsing red neon */
+.fx-redglow {
+  display: inline;
+  color: var(--signal-red);
+  font-weight: 700;
+  text-shadow:
+    0 0 4px rgba(255, 59, 48, 0.4),
+    0 0 12px rgba(255, 59, 48, 0.2),
+    0 0 24px rgba(255, 59, 48, 0.1);
+  animation: fx-redglow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fx-redglow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(255, 59, 48, 0.4),
+      0 0 12px rgba(255, 59, 48, 0.2),
+      0 0 24px rgba(255, 59, 48, 0.1);
+  }
+  50% {
+    text-shadow:
+      0 0 6px rgba(255, 59, 48, 0.6),
+      0 0 18px rgba(255, 59, 48, 0.35),
+      0 0 36px rgba(255, 59, 48, 0.15);
+  }
+}
+
+/* 6. BLUE GLOW — pulsing blue neon */
+.fx-blueglow {
+  display: inline;
+  color: #3B82F6;
+  font-weight: 700;
+  text-shadow:
+    0 0 4px rgba(59, 130, 246, 0.4),
+    0 0 12px rgba(59, 130, 246, 0.2),
+    0 0 24px rgba(59, 130, 246, 0.1);
+  animation: fx-blueglow-pulse 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+@keyframes fx-blueglow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(59, 130, 246, 0.4),
+      0 0 12px rgba(59, 130, 246, 0.2),
+      0 0 24px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    text-shadow:
+      0 0 6px rgba(59, 130, 246, 0.6),
+      0 0 18px rgba(59, 130, 246, 0.35),
+      0 0 36px rgba(59, 130, 246, 0.15);
+  }
+}
+
+/* 7. FADE — ghostly text that appears on hover */
+.fx-fade {
+  display: inline;
+  color: rgba(26, 26, 26, 0.15);
+  font-weight: 700;
+  font-style: italic;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  user-select: none;
+}
+
+.fx-fade:hover {
+  color: var(--charcoal);
+  text-shadow: 0 0 1px rgba(26, 26, 26, 0.3);
 }
 
 /* ==============================

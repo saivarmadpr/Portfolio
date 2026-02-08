@@ -12,7 +12,7 @@ import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
 import Blog from "@/components/Blog";
 import Contact from "@/components/Contact";
-import Marquee from "@/components/Marquee";
+
 import FlowingLines from "@/components/FlowingLines";
 
 export default function Home() {
@@ -41,58 +41,10 @@ export default function Home() {
             <FlowingLines />
             <Hero />
 
-            <Marquee
-              items={[
-                "PROMPT INJECTION",
-                "JAILBREAK ENGINEERING",
-                "MODEL EXPLOITATION",
-                "ADVERSARIAL ML",
-                "RED TEAM OPS",
-                "LLM SECURITY",
-                "AGENT HIJACKING",
-                "DATA EXFILTRATION",
-              ]}
-              variant="red"
-              speed="normal"
-            />
-
             <About />
-
-            <div className="section-divider mx-6 md:mx-12 lg:mx-20" />
-
             <Experience />
-
-            <Marquee
-              items={[
-                "TOP SECRET",
-                "CLASSIFIED",
-                "AUTHORIZED PERSONNEL ONLY",
-                "EYES ONLY",
-                "RESTRICTED ACCESS",
-                "DO NOT DISTRIBUTE",
-              ]}
-              variant="default"
-              speed="slow"
-            />
-
             <Projects />
-
-            <div className="section-divider mx-6 md:mx-12 lg:mx-20" />
-
             <Blog />
-
-            <Marquee
-              items={[
-                "BREAKING THINGS TO FIX THEM",
-                "OFFENSIVE SECURITY",
-                "RESPONSIBLE DISCLOSURE",
-                "ZERO TRUST",
-                "DEFENSE IN DEPTH",
-              ]}
-              variant="green"
-              speed="fast"
-            />
-
             <Contact />
           </motion.main>
         </SmoothScroll>
