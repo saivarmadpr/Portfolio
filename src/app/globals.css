@@ -1,0 +1,443 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==============================
+   DESIGN SYSTEM: Retro-Futuristic v2
+   ============================== */
+
+:root {
+  --ivory: #F5F4EB;
+  --charcoal: #1A1A1A;
+  --signal-red: #FF3B30;
+  --terminal-green: #39FF14;
+  --phosphor-amber: #FFB000;
+}
+
+/* ==============================
+   BASE STYLES
+   ============================== */
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: "Fira Code", "SF Mono", "Monaco", "Menlo", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+* {
+  cursor: none !important;
+}
+
+::selection {
+  background: var(--signal-red);
+  color: var(--ivory);
+}
+
+/* ==============================
+   CUSTOM SCROLLBAR
+   ============================== */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--charcoal);
+  border-radius: 0;
+}
+
+/* ==============================
+   NOISE / GRAIN TEXTURE OVERLAY
+   ============================== */
+
+.noise-overlay::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  animation: grain 0.5s steps(1) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -15%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(3%, 20%); }
+  90% { transform: translate(-10%, 10%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ==============================
+   SCANLINE OVERLAY
+   ============================== */
+
+.scanline-overlay::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.015) 2px,
+    rgba(0, 0, 0, 0.015) 4px
+  );
+}
+
+/* ==============================
+   DOT MATRIX BACKGROUND
+   ============================== */
+
+.dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(26, 26, 26, 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+.grid-bg {
+  background-image: radial-gradient(
+    circle,
+    rgba(26, 26, 26, 0.05) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* ==============================
+   TEXT SHADOW UTILITIES
+   ============================== */
+
+@layer utilities {
+  .text-shadow-heavy {
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.5), 0 0 20px rgba(57, 255, 20, 0.3);
+  }
+
+  .text-shadow-red {
+    text-shadow: 0 0 10px rgba(255, 59, 48, 0.4), 0 0 20px rgba(255, 59, 48, 0.2);
+  }
+
+  .text-shadow-brutal {
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15), 8px 8px 0px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* ==============================
+   REDACTED TEXT
+   ============================== */
+
+.redacted {
+  position: relative;
+  display: inline;
+  color: transparent;
+  background: var(--charcoal);
+  padding: 0 4px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  user-select: none;
+  border-radius: 1px;
+}
+
+.redacted:hover {
+  color: var(--signal-red);
+  background: rgba(255, 59, 48, 0.08);
+}
+
+/* ==============================
+   TERMINAL INPUT
+   ============================== */
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(26, 26, 26, 0.15);
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--charcoal);
+  padding: 10px 0;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.terminal-input:focus {
+  border-bottom-color: var(--terminal-green);
+}
+
+.terminal-input::placeholder {
+  color: rgba(26, 26, 26, 0.35);
+}
+
+/* ==============================
+   MAGNETIC BUTTON
+   ============================== */
+
+.magnetic-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ==============================
+   GLITCH EFFECT
+   ============================== */
+
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 var(--signal-red);
+  clip-path: inset(0 0 0 0);
+  animation: glitch-clip 3s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 var(--terminal-green);
+  clip-path: inset(0 0 0 0);
+  animation: glitch-clip 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-clip {
+  0% { clip-path: inset(40% 0 61% 0); }
+  20% { clip-path: inset(92% 0 1% 0); }
+  40% { clip-path: inset(43% 0 1% 0); }
+  60% { clip-path: inset(25% 0 58% 0); }
+  80% { clip-path: inset(54% 0 7% 0); }
+  100% { clip-path: inset(58% 0 43% 0); }
+}
+
+/* ==============================
+   FILE FOLDER CARD
+   ============================== */
+
+.file-folder {
+  position: relative;
+  background: var(--ivory);
+  border: 2px solid var(--charcoal);
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.file-folder::before {
+  content: "TOP SECRET";
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--signal-red);
+  color: var(--ivory);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  padding: 3px 14px;
+  text-transform: uppercase;
+}
+
+.file-folder:hover {
+  border-color: var(--signal-red);
+  transform: translateY(-4px);
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.08);
+}
+
+/* ==============================
+   HORIZONTAL SCROLL
+   ============================== */
+
+.horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* ==============================
+   MARQUEE / TICKER
+   ============================== */
+
+.marquee-track {
+  display: flex;
+  animation: marquee 30s linear infinite;
+  width: max-content;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ==============================
+   SECTION DIVIDER
+   ============================== */
+
+.section-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(26, 26, 26, 0.15) 20%,
+    rgba(26, 26, 26, 0.15) 80%,
+    transparent 100%
+  );
+}
+
+.section-divider::after {
+  content: "//";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--ivory);
+  padding: 0 16px;
+  font-size: 0.7rem;
+  color: rgba(26, 26, 26, 0.35);
+  letter-spacing: 0.3em;
+}
+
+/* ==============================
+   NAV INDICATOR DOT
+   ============================== */
+
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(26, 26, 26, 0.3);
+  transition: all 0.3s ease;
+}
+
+.nav-dot.active {
+  background: var(--signal-red);
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+}
+
+/* ==============================
+   PROGRESS BAR
+   ============================== */
+
+.progress-bar {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--terminal-green),
+    var(--phosphor-amber),
+    var(--signal-red)
+  );
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+/* ==============================
+   FLOATING BADGE
+   ============================== */
+
+.floating-badge {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ==============================
+   TYPING CURSOR
+   ============================== */
+
+.typing-cursor::after {
+  content: "█";
+  animation: typeBlink 0.8s step-end infinite;
+  color: var(--signal-red);
+}
+
+@keyframes typeBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ==============================
+   PHOTO SCANLINE REVEAL
+   ============================== */
+
+.photo-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-reveal::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(26, 26, 26, 0.08) 3px,
+    rgba(26, 26, 26, 0.08) 6px
+  );
+  pointer-events: none;
+}
