@@ -247,29 +247,49 @@ export default function TerminalAutocomplete() {
   const termY = useTransform(scrollYProgress, [0.05, 0.4], [160, 0]);
   const termOpacity = useTransform(scrollYProgress, [0.03, 0.18], [0, 1]);
 
+  // Subtle 3D tilt for depth
+  const termRotateX = useTransform(scrollYProgress, [0.05, 0.4], [6, 2]);
+
   return (
-    <div ref={showcaseRef}>
+    <div ref={showcaseRef} style={{ perspective: 1800 }}>
       <motion.div
         style={{
           scale: termScale,
           y: termY,
+          rotateX: termRotateX,
           opacity: termOpacity,
-          transformOrigin: "center center",
+          transformOrigin: "center bottom",
+          transformStyle: "preserve-3d",
         }}
       >
+        {/* Outer bezel — simulates a physical device frame */}
+        <div className="rounded-2xl p-[3px] bg-gradient-to-b from-[#444] via-[#222] to-[#111]">
         <motion.div
           ref={containerRef}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6 }}
-          className="border-2 border-charcoal bg-[#0a0a0a] relative overflow-hidden rounded-lg shadow-2xl"
+          className="bg-[#0a0a0a] relative overflow-hidden rounded-[14px]"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.05), 0 25px 60px -12px rgba(0,0,0,0.5), 0 50px 100px -20px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.6)",
+          }}
         >
+          {/* Screen gloss / reflection overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none z-10 rounded-[14px]"
+            style={{
+              background:
+                "linear-gradient(165deg, rgba(255,255,255,0.04) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.015) 100%)",
+            }}
+          />
+
       {/* Terminal header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[#1a1a1a] border-b border-[#333]">
+      <div className="flex items-center justify-between px-5 py-2.5 bg-gradient-to-b from-[#2a2a2a] to-[#1e1e1e] border-b border-[#000]">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-          <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-          <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+          <div className="w-3 h-3 rounded-full bg-[#ff5f57] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(255,95,87,0.3)]" />
+          <div className="w-3 h-3 rounded-full bg-[#febc2e] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(254,188,46,0.3)]" />
+          <div className="w-3 h-3 rounded-full bg-[#28c840] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2),0_0_4px_rgba(40,200,64,0.3)]" />
         </div>
         <span className="text-[10px] tracking-[0.3em] text-[#666] uppercase font-mono">
           sai@redteam — arsenal
@@ -308,6 +328,7 @@ export default function TerminalAutocomplete() {
         </motion.div>
       </div>
     </motion.div>
+        </div>
       </motion.div>
     </div>
   );
