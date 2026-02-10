@@ -29,7 +29,6 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     lenis.on("scroll", ({ scroll, direction }: { scroll: number; direction: number }) => {
       const aboutEl = document.getElementById("about");
       const terminalEl = document.getElementById("terminal");
-      const experienceEl = document.getElementById("experience");
       const heroHeight = window.innerHeight;
 
       // --- Snap 1: Hero → About ---
@@ -77,24 +76,26 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
         }
       }
 
-      // --- Snap 3: Terminal → Experience ---
-      if (experienceEl && terminalEl && !experienceSnapped.current && terminalSnapped.current && direction > 0) {
+      // --- Snap 3: Terminal → Experience (Mission Log marquee) ---
+      const experienceEl = document.getElementById("experience");
+      if (
+        experienceEl &&
+        terminalEl &&
+        !experienceSnapped.current &&
+        terminalSnapped.current &&
+        direction > 0
+      ) {
         const terminalTop = terminalEl.getBoundingClientRect().top + scroll;
         const terminalHeight = terminalEl.offsetHeight;
+        const experienceTop = experienceEl.getBoundingClientRect().top + scroll;
 
-        // Trigger when user has scrolled past 55% of the terminal section
-        if (scroll > terminalTop + terminalHeight * 0.55 && scroll < terminalTop + terminalHeight + heroHeight * 0.5) {
+        // Trigger when user scrolls past 60% of the terminal section
+        if (scroll > terminalTop + terminalHeight * 0.6 && scroll < experienceTop + heroHeight * 0.5) {
           experienceSnapped.current = true;
           lenis.stop();
-
-          // Account for fixed header so the marquee bar sits below it
-          const header = document.querySelector("header");
-          const headerH = header
-            ? Math.ceil(header.getBoundingClientRect().height)
-            : 56;
-
+          // Negative offset to account for the fixed transparent nav bar (~56px)
           lenis.scrollTo(experienceEl, {
-            offset: -headerH - 8,
+            offset: -60,
             duration: 1.2,
             force: true,
             easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
@@ -121,7 +122,8 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
       }
       if (experienceSnapped.current && terminalEl) {
         const terminalTop = terminalEl.getBoundingClientRect().top + scroll;
-        if (scroll < terminalTop + terminalEl.offsetHeight * 0.3) {
+        const terminalHeight = terminalEl.offsetHeight;
+        if (scroll < terminalTop + terminalHeight * 0.4) {
           experienceSnapped.current = false;
         }
       }

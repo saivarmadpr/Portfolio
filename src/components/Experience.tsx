@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion, useTransform, useInView, useMotionValue } from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Marquee from "@/components/Marquee";
 
 /* ══════════════════════════════════════════════
@@ -18,349 +18,445 @@ interface MissionItem {
   status: "ACTIVE" | "COMPLETED";
   description: string;
   details: string[];
+  verboseDetails: string[];
   techStack: string[];
 }
 
 const MISSIONS: MissionItem[] = [
   {
-    missionCode: "OP-2401",
+    missionCode: "OP-2601",
     index: "01",
-    date: "2024 — Present",
-    year: 2024,
+    date: "Jan 2026 — Present",
+    year: 2026,
     role: "AI Red Team Engineer",
-    company: "Independent",
+    company: "Votal AI Inc.",
     status: "ACTIVE",
-    description: "Leading adversarial testing of LLM-based applications",
+    description:
+      "Red teaming AI agents and LLM applications to identify security, safety, and alignment vulnerabilities in real-world deployments.",
     details: [
-      "Discovered 12+ critical vulnerabilities in production AI systems",
-      "Developed automated red teaming frameworks for LLM evaluation",
-      "Published research on prompt injection attack taxonomies",
-      "Advised organizations on AI safety and security posture",
+      "Executed adversarial testing on LLMs (prompt injection, jailbreaks, data leakage)",
+      "Assessed AI agents and tool-using workflows for security weaknesses",
+      "Delivered actionable remediation guidance for AI security risks",
     ],
-    techStack: ["Python", "GPT-4", "Claude", "Langchain", "Custom Tools"],
+    verboseDetails: [
+      "Tested multi-step reasoning chains and autonomous agent loops for exploitable behaviors",
+      "Mapped traditional OWASP attack surfaces to AI-specific threat vectors",
+      "Built internal testing methodologies and documentation for LLM security assessments",
+      "Collaborated cross-functionally with ML engineers on model hardening strategies",
+    ],
+    techStack: [
+      "Python",
+      "LLMs",
+      "AI Agents",
+      "Prompt Engineering",
+      "OWASP Top 10 for LLMs",
+      "Linux",
+      "Git",
+    ],
   },
   {
-    missionCode: "OP-2201",
+    missionCode: "OP-2101",
     index: "02",
-    date: "2022 — 2024",
-    year: 2022,
-    role: "Security Engineer",
-    company: "Tech Company",
+    date: "2021 — 2024",
+    year: 2021,
+    role: "API Security & Integration Engineer",
+    company: "IBM",
     status: "COMPLETED",
-    description: "Application security and penetration testing",
+    description:
+      "Designed and secured enterprise REST APIs and integration systems with a strong focus on application security.",
     details: [
-      "Conducted 50+ penetration tests on web applications",
-      "Built internal security tooling reducing vuln detection time by 40%",
-      "Trained engineering teams on secure coding practices",
-      "Established bug bounty program and triage process",
+      "Built and secured RESTful APIs using OWASP-aligned best practices",
+      "Implemented secure message-driven integrations with IBM ACE and MQ",
+      "Applied secure coding and data validation across enterprise systems",
     ],
-    techStack: ["Burp Suite", "Python", "Go", "AWS", "Docker"],
-  },
-  {
-    missionCode: "OP-2001",
-    index: "03",
-    date: "2020 — 2022",
-    year: 2020,
-    role: "Full Stack Developer",
-    company: "Startup",
-    status: "COMPLETED",
-    description: "Building scalable web applications",
-    details: [
-      "Architected microservices handling 1M+ requests/day",
-      "Led migration from monolith to event-driven architecture",
-      "Implemented CI/CD pipelines and infrastructure as code",
-      "Mentored junior developers on best practices",
+    verboseDetails: [
+      "Performed security reviews and testing of APIs prior to production deployment",
+      "Integrated automated security checks into CI/CD pipelines with DevOps teams",
+      "Prevented malformed and malicious payloads from propagating across enterprise systems",
+      "Built a foundation in application security that transitioned into dedicated cybersecurity roles",
     ],
-    techStack: ["TypeScript", "React", "Node.js", "PostgreSQL", "K8s"],
-  },
-  {
-    missionCode: "OP-1801",
-    index: "04",
-    date: "2018 — 2020",
-    year: 2018,
-    role: "Software Engineer",
-    company: "Enterprise",
-    status: "COMPLETED",
-    description: "Backend systems and API development",
-    details: [
-      "Developed RESTful APIs serving 500K+ users",
-      "Optimized database queries reducing latency by 60%",
-      "Implemented authentication and authorization systems",
-      "Contributed to open-source security tools",
+    techStack: [
+      "Java",
+      "Python",
+      "REST APIs",
+      "API Security",
+      "OWASP Top 10",
+      "IBM ACE",
+      "IBM MQ",
+      "Jenkins",
+      "Linux",
     ],
-    techStack: ["Java", "Spring Boot", "MySQL", "Redis", "Linux"],
   },
 ];
 
-const TOTAL = MISSIONS.length;
-const STEP = 1 / TOTAL;
-
 /* ══════════════════════════════════════════════
-   FOLDER CARD — 3D stacked classified briefing
+   TYPEWRITER HOOK
    ══════════════════════════════════════════════ */
 
-function FolderCard({
+function useTypewriter(
+  lines: string[],
+  shouldStart: boolean,
+  charDelay = 12,
+  lineDelay = 120,
+) {
+  const [visibleLines, setVisibleLines] = useState<string[]>([]);
+  const [done, setDone] = useState(false);
+  const started = useRef(false);
+
+  const run = useCallback(() => {
+    if (started.current) return;
+    started.current = true;
+
+    let lineIdx = 0;
+    let charIdx = 0;
+    const output: string[] = [];
+
+    function tick() {
+      if (lineIdx >= lines.length) {
+        setDone(true);
+        return;
+      }
+      const currentLine = lines[lineIdx];
+      charIdx++;
+      output[lineIdx] = currentLine.slice(0, charIdx);
+      setVisibleLines([...output]);
+
+      if (charIdx >= currentLine.length) {
+        lineIdx++;
+        charIdx = 0;
+        setTimeout(tick, lineDelay);
+      } else {
+        setTimeout(tick, charDelay);
+      }
+    }
+
+    tick();
+  }, [lines, charDelay, lineDelay]);
+
+  useEffect(() => {
+    if (shouldStart) run();
+  }, [shouldStart, run]);
+
+  return { visibleLines, done };
+}
+
+/* ══════════════════════════════════════════════
+   BOOT SEQUENCE DATA
+   ══════════════════════════════════════════════ */
+
+const BOOT_LINES: Record<string, string[]> = {
+  "OP-2601": [
+    "[OK] Initializing red team protocol...",
+    "[OK] Loading threat models...",
+    "[OK] Connection established.",
+  ],
+  "OP-2101": [
+    "[OK] Connecting to enterprise gateway...",
+    "[OK] Loading API schemas...",
+    "[OK] Session authenticated.",
+  ],
+};
+
+/* ══════════════════════════════════════════════
+   TERMINAL READOUT CARD
+   ══════════════════════════════════════════════ */
+
+function TerminalCard({
   mission,
   index,
-  scrollProgress,
 }: {
   mission: MissionItem;
   index: number;
-  scrollProgress: ReturnType<typeof useMotionValue>;
 }) {
-  const isLast = index === TOTAL - 1;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: true, amount: 0.25 });
+  const isActive = mission.status === "ACTIVE";
+  const filePath = `~/ops/${mission.missionCode.toLowerCase()}.log`;
 
-  /* ── Build scroll-driven keyframes ──
+  // Boot phase state
+  const [bootPhase, setBootPhase] = useState<"idle" | "booting" | "ready">("idle");
+  const bootStarted = useRef(false);
 
-     Each STEP of scrollProgress corresponds to one card's lifecycle.
-     Within each step, the first half is a HOLD (active card is readable),
-     and the second half is a TRANSITION (active card exits, next rises).
+  // Verbose toggle
+  const [verbose, setVerbose] = useState(false);
 
-     For card at `index`:
-       - While buried: offset down by depth × 50px, scaled down, dimmed
-       - Holds at each depth until the card above starts its exit
-       - When it becomes active: y=0, scale=1, opacity=1
-       - When it exits: flies upward (y=-800), scales up, fades out      */
+  const bootLines = BOOT_LINES[mission.missionCode] || [
+    "[OK] Loading mission data...",
+    "[OK] Decrypting payload... done.",
+  ];
 
-  const yIn: number[] = [];
-  const yOut: number[] = [];
-  const sIn: number[] = [];
-  const sOut: number[] = [];
-  const oIn: number[] = [];
-  const oOut: number[] = [];
-  const rIn: number[] = [];
-  const rOut: number[] = [];
-
-  const DEPTH_OFFSET = 50; // px per depth level — visible peek below active card
-  const DEPTH_SCALE = 0.035; // scale reduction per depth level
-  const DEPTH_OPACITY = 0.15; // opacity reduction per depth level
-
-  // Phase 1: Depth states — hold at each depth, then transition when card above exits
-  for (let j = 0; j <= index; j++) {
-    const depth = index - j;
-    const stepStart = j * STEP;
-    const stepMid = stepStart + STEP * 0.5;
-
-    const depthY = depth * DEPTH_OFFSET;
-    const depthScale = 1 - depth * DEPTH_SCALE;
-    const depthOpacity = depth === 0 ? 1 : Math.max(0.55, 1 - depth * DEPTH_OPACITY);
-
-    // Arrive at this depth level
-    yIn.push(stepStart);
-    yOut.push(depthY);
-    sIn.push(stepStart);
-    sOut.push(depthScale);
-    oIn.push(stepStart);
-    oOut.push(depthOpacity);
-    rIn.push(stepStart);
-    rOut.push(0);
-
-    // Hold at this depth through first half of the step (while card above is readable)
-    if (depth > 0) {
-      yIn.push(stepMid);
-      yOut.push(depthY);
-      sIn.push(stepMid);
-      sOut.push(depthScale);
-      oIn.push(stepMid);
-      oOut.push(depthOpacity);
-      rIn.push(stepMid);
-      rOut.push(0);
+  // Start boot when card scrolls into view
+  useEffect(() => {
+    if (isInView && !bootStarted.current) {
+      bootStarted.current = true;
+      setBootPhase("booting");
+      // Boot lines stagger in over ~0.9s (3 lines * 300ms), then pause briefly, then transition
+      const bootDuration = bootLines.length * 300 + 400;
+      setTimeout(() => {
+        setBootPhase("ready");
+      }, bootDuration);
     }
-  }
+  }, [isInView, bootLines.length]);
 
-  // Phase 2: Active hold → exit upward (skip exit for last card)
-  if (!isLast) {
-    const holdEnd = index * STEP + STEP * 0.5;
-    const exitEnd = (index + 1) * STEP;
-
-    // Hold at fully visible active state
-    yIn.push(holdEnd);
-    yOut.push(0);
-    sIn.push(holdEnd);
-    sOut.push(1);
-    oIn.push(holdEnd);
-    oOut.push(1);
-    rIn.push(holdEnd);
-    rOut.push(0);
-
-    // Exit — fly upward like a page being turned
-    yIn.push(exitEnd);
-    yOut.push(-800);
-    sIn.push(exitEnd);
-    sOut.push(1.05);
-    oIn.push(exitEnd);
-    oOut.push(0);
-    rIn.push(exitEnd);
-    rOut.push(-5);
-  }
-
-  // Pad to progress = 1
-  if (yIn[yIn.length - 1] < 1) {
-    yIn.push(1);
-    yOut.push(yOut[yOut.length - 1]);
-    sIn.push(1);
-    sOut.push(sOut[sOut.length - 1]);
-    oIn.push(1);
-    oOut.push(oOut[oOut.length - 1]);
-    rIn.push(1);
-    rOut.push(rOut[rOut.length - 1]);
-  }
-
-  const y = useTransform(scrollProgress, yIn, yOut);
-  const scale = useTransform(scrollProgress, sIn, sOut);
-  const opacity = useTransform(scrollProgress, oIn, oOut);
-  const rotateX = useTransform(scrollProgress, rIn, rOut);
-  const rotateZ = useTransform(
-    scrollProgress,
-    rIn,
-    rOut.map((val) => val * 0.35)
-  );
-  const lift = useTransform(scrollProgress, yIn, yOut.map((val) => val * 0.5));
-  const boxShadow = useTransform(
-    scrollProgress,
-    yIn,
-    yOut.map((val) => {
-      const blur = Math.max(6, 18 - val * 0.02);
-      return `0 ${Math.round(blur)}px ${Math.round(
-        blur * 2
-      )}px rgba(0,0,0,0.12)`;
-    })
+  // Typewriter starts only after boot completes
+  const { visibleLines, done: typewriterDone } = useTypewriter(
+    mission.details,
+    bootPhase === "ready",
+    10,
+    100,
   );
 
   return (
     <motion.div
-      className="absolute inset-x-0 top-0"
-      style={{
-        y,
-        scale,
-        opacity,
-        rotateX,
-        rotateZ,
-        z: lift,
-        zIndex: TOTAL - index,
-        transformOrigin: "top center",
-        transformStyle: "preserve-3d",
-        boxShadow,
+      ref={cardRef}
+      className={`terminal-card ${isActive ? "terminal-card-active" : ""}`}
+      initial={{ opacity: 0, y: 40, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{
+        duration: 0.7,
+        ease: [0.23, 1, 0.32, 1],
+        delay: index * 0.15,
       }}
+      whileHover={{ y: -6, transition: { duration: 0.3 } }}
     >
-      {/* ── Classified Folder Card ── */}
-      <div className="classified-folder relative bg-ivory border-2 border-charcoal/10 shadow-[0_8px_40px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-        {/* Folder tab — protrudes above like a real file tab */}
-        <div className="absolute -top-[28px] left-8 z-10">
-          <div className="bg-ivory px-5 py-1.5 rounded-t-md border border-b-0 border-charcoal/[0.08] shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-            <span className="text-[10px] tracking-[0.25em] text-charcoal/50 font-mono uppercase">
-              {mission.missionCode} — {mission.date}
-            </span>
-          </div>
+      {/* ── Terminal title bar ── */}
+      <div className="terminal-card-titlebar">
+        <div className="flex items-center gap-[6px]">
+          <span className="terminal-card-dot terminal-card-dot--red" />
+          <span className="terminal-card-dot terminal-card-dot--yellow" />
+          <span className="terminal-card-dot terminal-card-dot--green" />
         </div>
-
-        {/* Red tape strip — top edge */}
-        <div className="h-[3px] bg-gradient-to-r from-signal-red/80 via-signal-red/50 to-signal-red/10" />
-
-        {/* Folder header bar */}
-        <div className="flex items-center justify-between px-5 md:px-8 py-3 border-b border-charcoal/[0.06] bg-charcoal/[0.015]">
-          <span className="text-[9px] tracking-[0.4em] text-charcoal/25 uppercase font-mono">
-            FIELD OPERATION — {mission.company}
+        <span className="text-[10px] text-[#39FF14]/40 font-mono ml-3 tracking-wider">
+          {filePath}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isActive
+                ? "bg-[#39FF14] shadow-[0_0_6px_rgba(57,255,20,0.5)] animate-pulse"
+                : "bg-[#FFB000]/30"
+            }`}
+          />
+          <span
+            className={`text-[8px] tracking-[0.25em] font-bold uppercase font-mono ${
+              isActive ? "text-[#39FF14]" : "text-[#FFB000]/50"
+            }`}
+          >
+            {isActive ? "ACTIVE" : "DONE"}
           </span>
-          <div className="flex items-center gap-2.5">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                mission.status === "ACTIVE"
-                  ? "bg-terminal-green animate-pulse"
-                  : "bg-charcoal/20"
-              }`}
-            />
-            <span
-              className={`text-[9px] tracking-[0.3em] font-bold uppercase ${
-                mission.status === "ACTIVE"
-                  ? "text-terminal-green"
-                  : "text-charcoal/30"
-              }`}
-            >
-              {mission.status}
-            </span>
-          </div>
         </div>
+      </div>
 
-        {/* Card body */}
-        <div className="p-5 md:p-8 lg:p-10 relative">
-          {/* CLASSIFIED / COMPLETED stamp */}
-          <div className="absolute top-4 right-4 md:top-6 md:right-8 pointer-events-none select-none">
-            <div
-              className={`border-[3px] px-4 py-1.5 text-[10px] tracking-[0.35em] font-bold uppercase ${
-                mission.status === "ACTIVE"
-                  ? "border-terminal-green/50 text-terminal-green/60"
-                  : "border-signal-red/30 text-signal-red/40"
-              }`}
-              style={{ transform: "rotate(-12deg)" }}
-            >
-              {mission.status === "ACTIVE" ? "CLASSIFIED" : "COMPLETED"}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10">
-            {/* Left: Big index number */}
-            <div className="md:col-span-2 hidden md:block">
-              <span className="text-[80px] md:text-[110px] font-bold leading-none text-charcoal/[0.04] block select-none">
-                {mission.index}
+      {/* ── Card body ── */}
+      <div className="relative z-[1] p-4 md:p-5 lg:p-6 font-mono min-h-[280px]">
+        {/* ── Boot sequence overlay ── */}
+        {bootPhase === "booting" && (
+          <motion.div
+            className="absolute inset-0 z-10 p-4 md:p-5 lg:p-6 flex flex-col justify-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="mb-3">
+              <span className="text-[10px] text-[#39FF14]/50">
+                <span className="text-[#39FF14]/70">$</span> ./boot {mission.missionCode.toLowerCase()} --init
               </span>
             </div>
+            <div className="space-y-2.5">
+              {bootLines.map((line, i) => (
+                <motion.div
+                  key={i}
+                  className="text-[11px] text-[#39FF14]/70"
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.2,
+                    delay: i * 0.3,
+                    ease: "easeOut",
+                  }}
+                >
+                  <span className="text-[#39FF14]">{line.slice(0, 4)}</span>
+                  <span className="text-[#39FF14]/50">{line.slice(4)}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
-            {/* Right: Content */}
-            <div className="md:col-span-10">
-              <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-charcoal leading-[0.95]">
-                {mission.role}
-              </h3>
-              <p className="text-[10px] tracking-[0.3em] text-charcoal/40 uppercase mt-2">
-                @ {mission.company}
-              </p>
-              <p className="text-sm md:text-base text-charcoal/55 mt-4 leading-relaxed max-w-xl">
-                {mission.description}
-              </p>
+        {/* ── Real content (fades in after boot) ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={bootPhase === "ready" ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          {/* Command prompt with clickable --verbose */}
+          <div className="mb-4">
+            <span className="text-[10px] text-[#39FF14]/50">
+              <span className="text-[#39FF14]/70">$</span> cat {filePath}{" "}
+              <motion.button
+                onClick={() => setVerbose((v) => !v)}
+                className={`relative transition-colors duration-200 border-b border-dashed ${
+                  verbose
+                    ? "text-[#FFB000] hover:text-[#FFB000]/80 border-[#FFB000]/40"
+                    : "text-[#39FF14]/60 hover:text-[#39FF14]/90 border-[#39FF14]/30 hover:border-[#39FF14]/50"
+                }`}
+                title={verbose ? "Collapse verbose output" : "Expand verbose output"}
+                animate={
+                  !verbose
+                    ? {
+                        textShadow: [
+                          "0 0 0px rgba(57,255,20,0)",
+                          "0 0 6px rgba(57,255,20,0.4)",
+                          "0 0 0px rgba(57,255,20,0)",
+                        ],
+                      }
+                    : {}
+                }
+                transition={
+                  !verbose
+                    ? { duration: 2, repeat: 2, delay: 1.5 }
+                    : {}
+                }
+              >
+                --verbose
+              </motion.button>
+            </span>
+          </div>
 
-              {/* Mission details */}
-              <ul className="mt-5 space-y-2">
-                {mission.details.map((detail, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-charcoal/50 flex gap-3 leading-relaxed"
-                  >
-                    <span className="text-signal-red/60 shrink-0 text-[10px] mt-1">
-                      ▸
-                    </span>
-                    {detail}
-                  </li>
-                ))}
-              </ul>
+          {/* Date */}
+          <span className="text-[9px] tracking-[0.2em] text-[#FFB000]/50 block mb-1.5">
+            [{mission.date}]
+          </span>
 
-              {/* Tech loadout */}
-              <div className="mt-6">
-                <span className="text-[9px] tracking-[0.35em] text-charcoal/25 uppercase block mb-2">
-                  Loadout
+          {/* Role title */}
+          <h3 className="text-lg md:text-xl font-bold text-[#39FF14] leading-tight tracking-wide uppercase mb-1 text-shadow-glow">
+            {mission.role}
+          </h3>
+
+          {/* Company */}
+          <p className="text-[10px] tracking-[0.3em] text-[#FFB000]/60 uppercase">
+            @ {mission.company}
+          </p>
+
+          {/* Description */}
+          <p className="text-[11px] text-[#39FF14]/30 mt-3 leading-relaxed">
+            {mission.description}
+          </p>
+
+          {/* Divider */}
+          <div className="border-t border-[#39FF14]/[0.08] my-4" />
+
+          {/* Typewriter detail lines */}
+          <div className="space-y-2">
+            {visibleLines.map((line, i) => (
+              <div key={i} className="flex gap-2 items-start">
+                <span className="shrink-0 text-[#39FF14]/40 text-[10px] mt-0.5 select-none">
+                  {">"}
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {mission.techStack.map((tech) => (
-                    <span
-                      key={tech}
-                      className="text-[10px] px-2.5 py-1 bg-charcoal/[0.04] text-charcoal/45 border border-charcoal/[0.08] tracking-wider uppercase"
+                <span className="text-[11px] md:text-xs text-[#39FF14]/60 leading-relaxed">
+                  {line}
+                  {/* Show cursor at end of currently typing line */}
+                  {i === visibleLines.length - 1 && !typewriterDone && (
+                    <span className="terminal-cursor" />
+                  )}
+                </span>
+              </div>
+            ))}
+            {/* Blinking cursor after all lines are done, then fade out */}
+            {typewriterDone && (
+              <motion.div
+                className="flex gap-2 items-start"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ delay: 2, duration: 0.5 }}
+              >
+                <span className="shrink-0 text-[#39FF14]/40 text-[10px] mt-0.5 select-none">
+                  {">"}
+                </span>
+                <span className="terminal-cursor" />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Verbose expanded details */}
+          <AnimatePresence>
+            {verbose && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="border-t border-[#FFB000]/[0.1] my-3" />
+                <div className="mb-1">
+                  <span className="text-[7px] tracking-[0.35em] text-[#FFB000]/30 uppercase">
+                    // verbose output
+                  </span>
+                </div>
+                <div className="space-y-2 mt-2">
+                  {mission.verboseDetails.map((detail, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex gap-2 items-start"
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.08 }}
                     >
-                      {tech}
-                    </span>
+                      <span className="shrink-0 text-[#FFB000]/40 text-[10px] mt-0.5 select-none">
+                        {">"}
+                      </span>
+                      <span className="text-[11px] md:text-xs text-[#FFB000]/50 leading-relaxed">
+                        {detail}
+                      </span>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Divider */}
+          <div className="border-t border-[#39FF14]/[0.08] my-4" />
+
+          {/* Tech stack — fades in after typewriter */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={typewriterDone ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <span className="text-[7px] tracking-[0.35em] text-[#FFB000]/30 uppercase block mb-2">
+              // loaded_modules
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {mission.techStack.map((tech, i) => (
+                <motion.span
+                  key={tech}
+                  className="text-[9px] px-2.5 py-1 bg-[#39FF14]/[0.04] text-[#39FF14]/50 border border-[#39FF14]/[0.12] tracking-wider uppercase rounded-sm hover:text-[#39FF14]/80 hover:border-[#39FF14]/30 transition-colors duration-200"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={typewriterDone ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ duration: 0.3, delay: 0.3 + i * 0.04 }}
+                >
+                  {tech}
+                </motion.span>
+              ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
+      </div>
 
-        {/* Red tape accent — left edge */}
-        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-signal-red/25" />
-
-        {/* Bottom reference strip */}
-        <div className="px-5 md:px-8 py-2.5 border-t border-charcoal/[0.04]">
-          <span className="text-[8px] tracking-[0.3em] text-charcoal/15 font-mono uppercase">
-            REF/{mission.missionCode}/{mission.year} — PAGE{" "}
-            {mission.index} OF {String(TOTAL).padStart(2, "0")}
+      {/* ── Status bar (tmux/vim style) ── */}
+      <div className="terminal-card-statusbar">
+        <span className="text-[7px] tracking-[0.25em] text-[#39FF14]/20 uppercase">
+          {mission.missionCode}/REV-{mission.year}
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[7px] text-[#FFB000]/20 tracking-wider">
+            {mission.details.length} entries
+          </span>
+          <span className="text-[7px] text-[#39FF14]/20">
+            {mission.date}
           </span>
         </div>
       </div>
@@ -369,199 +465,97 @@ function FolderCard({
 }
 
 /* ══════════════════════════════════════════════
-   MAIN SECTION
+   MAIN SECTION — THE SPOTLIGHT TABLE
    ══════════════════════════════════════════════ */
 
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
-  const stackRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(sectionRef, { once: true, amount: 0.02 });
-  const scrollProgress = useMotionValue(0);
-  const touchStartY = useRef<number | null>(null);
-  const bodyOverflow = useRef<string>("");
-  const bodyOverscroll = useRef<string>("");
-  const isLocked = useRef(false);
-  const hasSnapped = useRef(false);
-
-  const lockBodyScroll = () => {
-    if (isLocked.current) return;
-    if (typeof document === "undefined") return;
-    bodyOverflow.current = document.body.style.overflow;
-    bodyOverscroll.current = document.body.style.overscrollBehavior;
-    document.body.style.overflow = "hidden";
-    document.body.style.overscrollBehavior = "none";
-    isLocked.current = true;
-  };
-
-  const unlockBodyScroll = () => {
-    if (!isLocked.current) return;
-    if (typeof document === "undefined") return;
-    document.body.style.overflow = bodyOverflow.current;
-    document.body.style.overscrollBehavior = bodyOverscroll.current;
-    isLocked.current = false;
-  };
-
-  /* ── Effect: lock scroll when snapped + card peel ──
-     Lenis (SmoothScroll.tsx) handles the snap to this section.
-     Once the marquee is in view, we lock body scroll and let
-     wheel / touch / keyboard drive the card peel animation. */
-  useEffect(() => {
-    const clamp = (v: number) => Math.max(0, Math.min(1, v));
-
-    /* --- Detect when Lenis has snapped us here --- */
-    const handleScroll = () => {
-      if (hasSnapped.current || !marqueeRef.current) return;
-
-      const rect = marqueeRef.current.getBoundingClientRect();
-      const header = document.querySelector("header");
-      const headerH = header
-        ? Math.ceil(header.getBoundingClientRect().height)
-        : 56;
-
-      // Marquee is near the top of the viewport (just below header) → Lenis snapped us
-      if (rect.top > 0 && rect.top < headerH + 80) {
-        hasSnapped.current = true;
-        lockBodyScroll();
-      }
-    };
-
-    /* --- Wheel: drives card peel when locked --- */
-    const handleWheel = (event: WheelEvent) => {
-      if (!isLocked.current) return;
-
-      const delta = event.deltaY;
-      if (delta === 0) return;
-
-      const current = scrollProgress.get();
-
-      // At the end → unlock and let page scroll normally
-      if (current >= 1 && delta > 0) {
-        unlockBodyScroll();
-        return;
-      }
-
-      const next = clamp(current + delta / (window.innerHeight * TOTAL));
-      if (next !== current) scrollProgress.set(next);
-
-      if (event.cancelable) event.preventDefault();
-    };
-
-    /* --- Touch --- */
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0]?.clientY ?? null;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      if (!isLocked.current || touchStartY.current === null) return;
-
-      const currentY = event.touches[0]?.clientY ?? touchStartY.current;
-      const delta = touchStartY.current - currentY;
-      if (delta === 0) return;
-
-      const current = scrollProgress.get();
-      if (current >= 1 && delta > 0) {
-        unlockBodyScroll();
-        return;
-      }
-
-      scrollProgress.set(
-        clamp(current + delta / (window.innerHeight * TOTAL))
-      );
-      touchStartY.current = currentY;
-      if (event.cancelable) event.preventDefault();
-    };
-
-    /* --- Keyboard --- */
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isLocked.current) return;
-      const keys = ["ArrowDown", "ArrowUp", "PageDown", "PageUp", " "];
-      if (!keys.includes(event.key)) return;
-
-      const dir =
-        event.key === "ArrowUp" || event.key === "PageUp" ? -1 : 1;
-      const current = scrollProgress.get();
-      if (current >= 1 && dir > 0) {
-        unlockBodyScroll();
-        return;
-      }
-
-      scrollProgress.set(clamp(current + 0.06 * dir));
-      if (event.cancelable) event.preventDefault();
-    };
-
-    /* --- Progress watcher: unlock when last card revealed --- */
-    const unsubscribe = scrollProgress.on("change", (latest) => {
-      if (latest >= 1) {
-        unlockBodyScroll();
-      }
-    });
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("keydown", handleKeyDown, { passive: false });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("keydown", handleKeyDown);
-      unsubscribe();
-      unlockBodyScroll();
-    };
-  }, [scrollProgress]);
 
   return (
     <section ref={sectionRef} className="relative" id="experience">
       {/* Marquee banner */}
-      <div ref={marqueeRef}>
-        <Marquee
-          items={[
-            "MISSION LOG",
-            "FIELD OPERATIONS",
-            "CAMPAIGN RECORD",
-            "DEPLOYMENT HISTORY",
-            "THREAT RESPONSE",
-          ]}
-          variant="default"
-          speed="slow"
-        />
-      </div>
+      <Marquee
+        items={[
+          "MISSION LOG",
+          "FIELD OPERATIONS",
+          "CAMPAIGN RECORD",
+          "DEPLOYMENT HISTORY",
+          "THREAT RESPONSE",
+        ]}
+        variant="default"
+        speed="slow"
+      />
 
-      {/* Section header */}
-      <div className="px-6 md:px-12 lg:px-20 pt-14 pb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={headerInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-shadow-brutal leading-none">
-            <span>MISSION </span>
-            <span className="text-signal-red">LOG</span>
-          </h2>
-          <p className="text-xs text-charcoal/40 mt-5 font-mono tracking-wider">
-            $ cat /ops/missions.log --all --chronological
-          </p>
-        </motion.div>
-      </div>
+      {/* ── Spotlight Table ── */}
+      <div className="spotlight-table py-16 md:py-24">
+        {/* Section header */}
+        <div className="px-6 md:px-12 lg:px-20 mb-12 md:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-shadow-brutal leading-none">
+              <span>MISSION </span>
+              <span className="text-signal-red">LOG</span>
+            </h2>
+            <p className="text-xs text-charcoal/40 mt-5 font-mono tracking-wider">
+              $ cat /ops/missions.log --all --chronological
+            </p>
+          </motion.div>
+        </div>
 
-      {/* ── Card stack scroll area ── */}
-      <div ref={stackRef} className="relative h-screen overflow-hidden">
-        <div
-          className="relative mx-auto max-w-5xl px-6 md:px-12 pt-12"
-          style={{ perspective: "1200px" }}
-        >
-          {MISSIONS.map((mission, i) => (
-            <FolderCard
-              key={mission.missionCode}
-              mission={mission}
-              index={i}
-              scrollProgress={scrollProgress}
-            />
-          ))}
+        {/* ── Mission Cards with Timeline ── */}
+        <div className="px-6 md:px-12 lg:px-20 max-w-7xl mx-auto">
+          <div className="relative">
+            {/* Timeline connector — visible only on desktop side-by-side */}
+            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 z-0 pointer-events-none">
+              {/* Dashed vertical line */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 top-[10%] bottom-[10%]"
+                style={{
+                  width: "1px",
+                  backgroundImage:
+                    "repeating-linear-gradient(to bottom, rgba(57,255,20,0.2) 0px, rgba(57,255,20,0.2) 6px, transparent 6px, transparent 14px)",
+                }}
+              />
+              {/* Top node dot */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-[50%] -translate-y-[calc(50%+2rem)]">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14]/20 border border-[#39FF14]/30 shadow-[0_0_8px_rgba(57,255,20,0.15)]">
+                  <div className="w-1 h-1 rounded-full bg-[#39FF14]/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+              {/* Center node dot */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-[50%] -translate-y-1/2">
+                <div className="w-3 h-3 rounded-full bg-[#39FF14]/15 border border-[#39FF14]/25 shadow-[0_0_12px_rgba(57,255,20,0.1)]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#39FF14]/50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+              {/* Bottom node dot */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-[50%] translate-y-[calc(-50%+2rem)]">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14]/20 border border-[#39FF14]/30 shadow-[0_0_8px_rgba(57,255,20,0.15)]">
+                  <div className="w-1 h-1 rounded-full bg-[#39FF14]/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card grid */}
+            <div className="relative z-[1] grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
+              {MISSIONS.map((mission, i) => (
+                <TerminalCard
+                  key={mission.missionCode}
+                  mission={mission}
+                  index={i}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Decorative bottom fade */}
+        <div className="mt-12 md:mt-16 flex justify-center">
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-charcoal/10 to-transparent" />
         </div>
       </div>
     </section>

@@ -461,12 +461,124 @@ body {
 }
 
 /* ==============================
-   CLASSIFIED FOLDER
+   EXPERIENCE — Terminal Readout Cards
    ============================== */
 
-.classified-folder {
+/* Table surface */
+.spotlight-table {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
+}
+
+/* Terminal card — dark panel */
+.terminal-card {
+  position: relative;
+  background: #0d0d0d;
+  border: 1px solid rgba(57, 255, 20, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.4s ease,
+              box-shadow 0.4s ease;
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(57, 255, 20, 0.05);
+}
+
+/* Hover: lift with green glow */
+.terminal-card:hover {
+  border-color: rgba(57, 255, 20, 0.25);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(57, 255, 20, 0.04),
+    inset 0 1px 0 rgba(57, 255, 20, 0.08);
+}
+
+/* Active card: pulsing green glow */
+@keyframes terminalPulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(57, 255, 20, 0.03),
+      inset 0 1px 0 rgba(57, 255, 20, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 4px 28px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(57, 255, 20, 0.06),
+      inset 0 1px 0 rgba(57, 255, 20, 0.1);
+  }
+}
+
+.terminal-card-active {
+  border-color: rgba(57, 255, 20, 0.2);
+  animation: terminalPulse 4s ease-in-out infinite;
+}
+
+/* Terminal title bar (macOS-style window chrome) */
+.terminal-card-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #141414;
+  border-bottom: 1px solid rgba(57, 255, 20, 0.08);
+}
+
+.terminal-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.terminal-card-dot--red { background: #FF5F56; }
+.terminal-card-dot--yellow { background: #FFBD2E; }
+.terminal-card-dot--green { background: #27C93F; }
+
+/* CRT scanline overlay on card */
+.terminal-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(57, 255, 20, 0.015) 2px,
+    rgba(57, 255, 20, 0.015) 4px
+  );
+}
+
+/* Terminal status bar (vim/tmux style) */
+.terminal-card-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: #141414;
+  border-top: 1px solid rgba(57, 255, 20, 0.08);
+}
+
+/* Blinking cursor keyframes */
+@keyframes terminalCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: var(--terminal-green);
+  animation: terminalCursorBlink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  box-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
 }
 
 /* ==============================
