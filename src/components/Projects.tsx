@@ -65,7 +65,7 @@ const PROJECTS: Project[] = [
     description:
       "A deception-driven security platform that deploys honeypots across cloud and network environments to attract malicious actors. The system captures attacker techniques, payloads, and movement patterns, enabling the study of real-world attack vectors and informing defensive strategy and threat modeling.",
     techStack: ["Python", "Honeypots", "Deception Technology", "Network Security", "Threat Intelligence", "Linux", "Log Analysis"],
-    status: "COMPLETED",
+    status: "COMPLETED.",
     link: "https://github.com/saivarmadpr/Cloud_Security_Posture_-_Deception_Platform",
   },
 ];
