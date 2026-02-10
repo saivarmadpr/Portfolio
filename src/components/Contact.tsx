@@ -118,7 +118,7 @@ export default function Contact() {
             START <span className="text-signal-red">TRANSMISSION</span>
           </h2>
           <p className="mt-4 text-[10px] tracking-[0.2em] text-charcoal/35 uppercase font-mono">
-            // SELECT A CHANNEL OR COMPOSE A SECURE DISPATCH
+            {"// SELECT A CHANNEL OR COMPOSE A SECURE DISPATCH"}
           </p>
         </motion.div>
 

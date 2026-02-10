@@ -443,7 +443,7 @@ function TerminalCard({
                     className="text-[7px] tracking-[0.35em] uppercase"
                     style={{ color: `rgba(${c.secondaryRgb}, 0.3)` }}
                   >
-                    // verbose output
+                    {"// verbose output"}
                   </span>
                 </div>
                 <div className="space-y-2 mt-2">
@@ -487,7 +487,7 @@ function TerminalCard({
               className="text-[7px] tracking-[0.35em] uppercase block mb-2"
               style={{ color: `rgba(${c.secondaryRgb}, 0.3)` }}
             >
-              // loaded_modules
+              {"// loaded_modules"}
             </span>
             <div className="flex flex-wrap gap-1.5">
               {mission.techStack.map((tech, i) => (

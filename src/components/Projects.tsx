@@ -71,12 +71,6 @@ const PROJECTS: Project[] = [
 ];
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const classificationColor = {
-    CRITICAL: "text-signal-red border-signal-red bg-signal-red/[0.04]",
-    HIGH: "text-phosphor-amber border-phosphor-amber bg-phosphor-amber/[0.04]",
-    MEDIUM: "text-charcoal/50 border-charcoal/30 bg-charcoal/[0.02]",
-  };
-
   const statusColor: Record<string, string> = {
     ACTIVE: "text-terminal-green",
     COMPLETED: "text-charcoal/60",

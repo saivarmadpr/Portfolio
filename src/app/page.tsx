@@ -11,7 +11,6 @@ import About from "@/components/About";
 import TerminalAutocomplete from "@/components/TerminalAutocomplete";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
-import Blog from "@/components/Blog";
 import Contact from "@/components/Contact";
 
 import FlowingLines from "@/components/FlowingLines";
