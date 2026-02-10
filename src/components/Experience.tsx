@@ -161,6 +161,28 @@ const BOOT_LINES: Record<string, string[]> = {
    TERMINAL READOUT CARD
    ══════════════════════════════════════════════ */
 
+/* ── Color palettes per card type ── */
+const CARD_COLORS = {
+  active: {
+    primary: "#FF3B30",       // signal red
+    primaryRgb: "255,59,48",
+    dim: "#FF3B30",
+    secondary: "#FFB000",     // amber for dates/labels
+    secondaryRgb: "255,176,0",
+    verbose: "#FFB000",
+    glowClass: "text-shadow-red",
+  },
+  completed: {
+    primary: "#C8C8C8",       // muted gray/white
+    primaryRgb: "200,200,200",
+    dim: "#A0A0A0",
+    secondary: "#888888",     // dimmer gray for dates/labels
+    secondaryRgb: "136,136,136",
+    verbose: "#A0A0A0",
+    glowClass: "",
+  },
+} as const;
+
 function TerminalCard({
   mission,
   index,
@@ -172,6 +194,8 @@ function TerminalCard({
   const isInView = useInView(cardRef, { once: true, amount: 0.25 });
   const isActive = mission.status === "ACTIVE";
   const filePath = `~/ops/${mission.missionCode.toLowerCase()}.log`;
+
+  const c = isActive ? CARD_COLORS.active : CARD_COLORS.completed;
 
   // Boot phase state
   const [bootPhase, setBootPhase] = useState<"idle" | "booting" | "ready">("idle");
@@ -190,7 +214,6 @@ function TerminalCard({
     if (isInView && !bootStarted.current) {
       bootStarted.current = true;
       setBootPhase("booting");
-      // Boot lines stagger in over ~0.9s (3 lines * 300ms), then pause briefly, then transition
       const bootDuration = bootLines.length * 300 + 400;
       setTimeout(() => {
         setBootPhase("ready");
@@ -227,21 +250,23 @@ function TerminalCard({
           <span className="terminal-card-dot terminal-card-dot--yellow" />
           <span className="terminal-card-dot terminal-card-dot--green" />
         </div>
-        <span className="text-[10px] text-[#39FF14]/40 font-mono ml-3 tracking-wider">
+        <span
+          className="text-[10px] font-mono ml-3 tracking-wider"
+          style={{ color: `rgba(${c.primaryRgb}, 0.4)` }}
+        >
           {filePath}
         </span>
         <div className="ml-auto flex items-center gap-2">
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              isActive
-                ? "bg-[#39FF14] shadow-[0_0_6px_rgba(57,255,20,0.5)] animate-pulse"
-                : "bg-[#FFB000]/30"
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${isActive ? "animate-pulse" : ""}`}
+            style={{
+              backgroundColor: isActive ? c.primary : `rgba(${c.primaryRgb}, 0.3)`,
+              boxShadow: isActive ? `0 0 6px rgba(${c.primaryRgb}, 0.5)` : "none",
+            }}
           />
           <span
-            className={`text-[8px] tracking-[0.25em] font-bold uppercase font-mono ${
-              isActive ? "text-[#39FF14]" : "text-[#FFB000]/50"
-            }`}
+            className="text-[8px] tracking-[0.25em] font-bold uppercase font-mono"
+            style={{ color: isActive ? c.primary : `rgba(${c.primaryRgb}, 0.5)` }}
           >
             {isActive ? "ACTIVE" : "DONE"}
           </span>
@@ -259,15 +284,17 @@ function TerminalCard({
             exit={{ opacity: 0 }}
           >
             <div className="mb-3">
-              <span className="text-[10px] text-[#39FF14]/50">
-                <span className="text-[#39FF14]/70">$</span> ./boot {mission.missionCode.toLowerCase()} --init
+              <span className="text-[10px]" style={{ color: `rgba(${c.primaryRgb}, 0.5)` }}>
+                <span style={{ color: `rgba(${c.primaryRgb}, 0.7)` }}>$</span> ./boot{" "}
+                {mission.missionCode.toLowerCase()} --init
               </span>
             </div>
             <div className="space-y-2.5">
               {bootLines.map((line, i) => (
                 <motion.div
                   key={i}
-                  className="text-[11px] text-[#39FF14]/70"
+                  className="text-[11px]"
+                  style={{ color: `rgba(${c.primaryRgb}, 0.7)` }}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{
@@ -276,8 +303,8 @@ function TerminalCard({
                     ease: "easeOut",
                   }}
                 >
-                  <span className="text-[#39FF14]">{line.slice(0, 4)}</span>
-                  <span className="text-[#39FF14]/50">{line.slice(4)}</span>
+                  <span style={{ color: c.primary }}>{line.slice(0, 4)}</span>
+                  <span style={{ color: `rgba(${c.primaryRgb}, 0.5)` }}>{line.slice(4)}</span>
                 </motion.div>
               ))}
             </div>
@@ -292,23 +319,25 @@ function TerminalCard({
         >
           {/* Command prompt with clickable --verbose */}
           <div className="mb-4">
-            <span className="text-[10px] text-[#39FF14]/50">
-              <span className="text-[#39FF14]/70">$</span> cat {filePath}{" "}
+            <span className="text-[10px]" style={{ color: `rgba(${c.primaryRgb}, 0.5)` }}>
+              <span style={{ color: `rgba(${c.primaryRgb}, 0.7)` }}>$</span> cat {filePath}{" "}
               <motion.button
                 onClick={() => setVerbose((v) => !v)}
-                className={`relative transition-colors duration-200 border-b border-dashed ${
-                  verbose
-                    ? "text-[#FFB000] hover:text-[#FFB000]/80 border-[#FFB000]/40"
-                    : "text-[#39FF14]/60 hover:text-[#39FF14]/90 border-[#39FF14]/30 hover:border-[#39FF14]/50"
-                }`}
+                className="relative transition-colors duration-200 border-b border-dashed"
+                style={{
+                  color: verbose ? c.verbose : `rgba(${c.primaryRgb}, 0.6)`,
+                  borderColor: verbose
+                    ? `rgba(${c.secondaryRgb}, 0.4)`
+                    : `rgba(${c.primaryRgb}, 0.3)`,
+                }}
                 title={verbose ? "Collapse verbose output" : "Expand verbose output"}
                 animate={
                   !verbose
                     ? {
                         textShadow: [
-                          "0 0 0px rgba(57,255,20,0)",
-                          "0 0 6px rgba(57,255,20,0.4)",
-                          "0 0 0px rgba(57,255,20,0)",
+                          `0 0 0px rgba(${c.primaryRgb}, 0)`,
+                          `0 0 6px rgba(${c.primaryRgb}, 0.4)`,
+                          `0 0 0px rgba(${c.primaryRgb}, 0)`,
                         ],
                       }
                     : {}
@@ -325,45 +354,61 @@ function TerminalCard({
           </div>
 
           {/* Date */}
-          <span className="text-[9px] tracking-[0.2em] text-[#FFB000]/50 block mb-1.5">
+          <span
+            className="text-[9px] tracking-[0.2em] block mb-1.5"
+            style={{ color: `rgba(${c.secondaryRgb}, 0.5)` }}
+          >
             [{mission.date}]
           </span>
 
           {/* Role title */}
-          <h3 className="text-lg md:text-xl font-bold text-[#39FF14] leading-tight tracking-wide uppercase mb-1 text-shadow-glow">
+          <h3
+            className={`text-lg md:text-xl font-bold leading-tight tracking-wide uppercase mb-1 ${c.glowClass}`}
+            style={{ color: c.primary }}
+          >
             {mission.role}
           </h3>
 
           {/* Company */}
-          <p className="text-[10px] tracking-[0.3em] text-[#FFB000]/60 uppercase">
+          <p
+            className="text-[10px] tracking-[0.3em] uppercase"
+            style={{ color: `rgba(${c.secondaryRgb}, 0.6)` }}
+          >
             @ {mission.company}
           </p>
 
           {/* Description */}
-          <p className="text-[11px] text-[#39FF14]/30 mt-3 leading-relaxed">
+          <p
+            className="text-[11px] mt-3 leading-relaxed"
+            style={{ color: `rgba(${c.primaryRgb}, 0.3)` }}
+          >
             {mission.description}
           </p>
 
           {/* Divider */}
-          <div className="border-t border-[#39FF14]/[0.08] my-4" />
+          <div className="my-4" style={{ borderTop: `1px solid rgba(${c.primaryRgb}, 0.08)` }} />
 
           {/* Typewriter detail lines */}
           <div className="space-y-2">
             {visibleLines.map((line, i) => (
               <div key={i} className="flex gap-2 items-start">
-                <span className="shrink-0 text-[#39FF14]/40 text-[10px] mt-0.5 select-none">
+                <span
+                  className="shrink-0 text-[10px] mt-0.5 select-none"
+                  style={{ color: `rgba(${c.primaryRgb}, 0.4)` }}
+                >
                   {">"}
                 </span>
-                <span className="text-[11px] md:text-xs text-[#39FF14]/60 leading-relaxed">
+                <span
+                  className="text-[11px] md:text-xs leading-relaxed"
+                  style={{ color: `rgba(${c.primaryRgb}, 0.6)` }}
+                >
                   {line}
-                  {/* Show cursor at end of currently typing line */}
                   {i === visibleLines.length - 1 && !typewriterDone && (
                     <span className="terminal-cursor" />
                   )}
                 </span>
               </div>
             ))}
-            {/* Blinking cursor after all lines are done, then fade out */}
             {typewriterDone && (
               <motion.div
                 className="flex gap-2 items-start"
@@ -371,7 +416,10 @@ function TerminalCard({
                 animate={{ opacity: 0 }}
                 transition={{ delay: 2, duration: 0.5 }}
               >
-                <span className="shrink-0 text-[#39FF14]/40 text-[10px] mt-0.5 select-none">
+                <span
+                  className="shrink-0 text-[10px] mt-0.5 select-none"
+                  style={{ color: `rgba(${c.primaryRgb}, 0.4)` }}
+                >
                   {">"}
                 </span>
                 <span className="terminal-cursor" />
@@ -389,9 +437,12 @@ function TerminalCard({
                 transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 className="overflow-hidden"
               >
-                <div className="border-t border-[#FFB000]/[0.1] my-3" />
+                <div className="my-3" style={{ borderTop: `1px solid rgba(${c.secondaryRgb}, 0.1)` }} />
                 <div className="mb-1">
-                  <span className="text-[7px] tracking-[0.35em] text-[#FFB000]/30 uppercase">
+                  <span
+                    className="text-[7px] tracking-[0.35em] uppercase"
+                    style={{ color: `rgba(${c.secondaryRgb}, 0.3)` }}
+                  >
                     // verbose output
                   </span>
                 </div>
@@ -404,10 +455,16 @@ function TerminalCard({
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.25, delay: i * 0.08 }}
                     >
-                      <span className="shrink-0 text-[#FFB000]/40 text-[10px] mt-0.5 select-none">
+                      <span
+                        className="shrink-0 text-[10px] mt-0.5 select-none"
+                        style={{ color: `rgba(${c.secondaryRgb}, 0.4)` }}
+                      >
                         {">"}
                       </span>
-                      <span className="text-[11px] md:text-xs text-[#FFB000]/50 leading-relaxed">
+                      <span
+                        className="text-[11px] md:text-xs leading-relaxed"
+                        style={{ color: `rgba(${c.secondaryRgb}, 0.5)` }}
+                      >
                         {detail}
                       </span>
                     </motion.div>
@@ -418,7 +475,7 @@ function TerminalCard({
           </AnimatePresence>
 
           {/* Divider */}
-          <div className="border-t border-[#39FF14]/[0.08] my-4" />
+          <div className="my-4" style={{ borderTop: `1px solid rgba(${c.primaryRgb}, 0.08)` }} />
 
           {/* Tech stack — fades in after typewriter */}
           <motion.div
@@ -426,14 +483,22 @@ function TerminalCard({
             animate={typewriterDone ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span className="text-[7px] tracking-[0.35em] text-[#FFB000]/30 uppercase block mb-2">
+            <span
+              className="text-[7px] tracking-[0.35em] uppercase block mb-2"
+              style={{ color: `rgba(${c.secondaryRgb}, 0.3)` }}
+            >
               // loaded_modules
             </span>
             <div className="flex flex-wrap gap-1.5">
               {mission.techStack.map((tech, i) => (
                 <motion.span
                   key={tech}
-                  className="text-[9px] px-2.5 py-1 bg-[#39FF14]/[0.04] text-[#39FF14]/50 border border-[#39FF14]/[0.12] tracking-wider uppercase rounded-sm hover:text-[#39FF14]/80 hover:border-[#39FF14]/30 transition-colors duration-200"
+                  className="text-[9px] px-2.5 py-1 tracking-wider uppercase rounded-sm transition-colors duration-200"
+                  style={{
+                    backgroundColor: `rgba(${c.primaryRgb}, 0.04)`,
+                    color: `rgba(${c.primaryRgb}, 0.5)`,
+                    border: `1px solid rgba(${c.primaryRgb}, 0.12)`,
+                  }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={typewriterDone ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.3, delay: 0.3 + i * 0.04 }}
@@ -448,14 +513,23 @@ function TerminalCard({
 
       {/* ── Status bar (tmux/vim style) ── */}
       <div className="terminal-card-statusbar">
-        <span className="text-[7px] tracking-[0.25em] text-[#39FF14]/20 uppercase">
+        <span
+          className="text-[7px] tracking-[0.25em] uppercase"
+          style={{ color: `rgba(${c.primaryRgb}, 0.2)` }}
+        >
           {mission.missionCode}/REV-{mission.year}
         </span>
         <div className="flex items-center gap-3">
-          <span className="text-[7px] text-[#FFB000]/20 tracking-wider">
+          <span
+            className="text-[7px] tracking-wider"
+            style={{ color: `rgba(${c.secondaryRgb}, 0.2)` }}
+          >
             {mission.details.length} entries
           </span>
-          <span className="text-[7px] text-[#39FF14]/20">
+          <span
+            className="text-[7px]"
+            style={{ color: `rgba(${c.primaryRgb}, 0.2)` }}
+          >
             {mission.date}
           </span>
         </div>
@@ -517,25 +591,25 @@ export default function Experience() {
                 style={{
                   width: "1px",
                   backgroundImage:
-                    "repeating-linear-gradient(to bottom, rgba(57,255,20,0.2) 0px, rgba(57,255,20,0.2) 6px, transparent 6px, transparent 14px)",
+                    "repeating-linear-gradient(to bottom, rgba(200,200,200,0.15) 0px, rgba(200,200,200,0.15) 6px, transparent 6px, transparent 14px)",
                 }}
               />
               {/* Top node dot */}
               <div className="absolute left-1/2 -translate-x-1/2 top-[50%] -translate-y-[calc(50%+2rem)]">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14]/20 border border-[#39FF14]/30 shadow-[0_0_8px_rgba(57,255,20,0.15)]">
-                  <div className="w-1 h-1 rounded-full bg-[#39FF14]/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="relative w-2.5 h-2.5 rounded-full bg-white/10 border border-white/20 shadow-[0_0_8px_rgba(200,200,200,0.1)]">
+                  <div className="w-1 h-1 rounded-full bg-white/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
               </div>
-              {/* Center node dot */}
+              {/* Center node dot — signal red accent */}
               <div className="absolute left-1/2 -translate-x-1/2 top-[50%] -translate-y-1/2">
-                <div className="w-3 h-3 rounded-full bg-[#39FF14]/15 border border-[#39FF14]/25 shadow-[0_0_12px_rgba(57,255,20,0.1)]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#39FF14]/50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="relative w-3 h-3 rounded-full bg-[#FF3B30]/10 border border-[#FF3B30]/20 shadow-[0_0_12px_rgba(255,59,48,0.1)]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#FF3B30]/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
               </div>
               {/* Bottom node dot */}
               <div className="absolute left-1/2 -translate-x-1/2 top-[50%] translate-y-[calc(-50%+2rem)]">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14]/20 border border-[#39FF14]/30 shadow-[0_0_8px_rgba(57,255,20,0.15)]">
-                  <div className="w-1 h-1 rounded-full bg-[#39FF14]/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="relative w-2.5 h-2.5 rounded-full bg-white/10 border border-white/20 shadow-[0_0_8px_rgba(200,200,200,0.1)]">
+                  <div className="w-1 h-1 rounded-full bg-white/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
               </div>
             </div>
