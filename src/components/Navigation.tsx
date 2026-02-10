@@ -8,8 +8,7 @@ const NAV_ITEMS = [
   { id: "about", label: "01", title: "DOSSIER" },
   { id: "experience", label: "02", title: "MISSIONS" },
   { id: "projects", label: "03", title: "ARSENAL" },
-  { id: "blog", label: "04", title: "REPORTS" },
-  { id: "contact", label: "05", title: "COMMS" },
+  { id: "contact", label: "04", title: "COMMS" },
 ];
 
 export default function Navigation() {

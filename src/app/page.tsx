@@ -56,7 +56,7 @@ export default function Home() {
 
             <Experience />
             <Projects />
-            <Blog />
+            {/* <Blog /> */}
             <Contact />
           </motion.main>
         </SmoothScroll>

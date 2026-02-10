@@ -429,35 +429,73 @@ body {
 }
 
 /* ==============================
-   FILE FOLDER CARD
+   FOLDER CARD (macOS-style)
    ============================== */
 
-.file-folder {
+.folder-card {
   position: relative;
-  background: var(--ivory);
-  border: 2px solid var(--charcoal);
-  padding: 2rem;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.file-folder::before {
-  content: "TOP SECRET";
-  position: absolute;
-  top: -12px;
-  left: 20px;
-  background: var(--signal-red);
+/* Folder tab — the small ear at the top-left */
+.folder-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 55%;
+  padding: 6px 16px 4px;
+  background: var(--charcoal);
   color: var(--ivory);
-  font-size: 0.6rem;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+  z-index: 1;
+  font-size: 0.55rem;
   font-weight: 700;
-  letter-spacing: 0.25em;
-  padding: 3px 14px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
-.file-folder:hover {
+/* Curved connector from tab to body right edge */
+.folder-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: -12px;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 0 0, transparent 12px, var(--charcoal) 12px);
+}
+
+/* Folder body — main content area */
+.folder-body {
+  position: relative;
+  background: var(--ivory);
+  border: 2px solid var(--charcoal);
+  border-radius: 0 10px 10px 10px;
+  padding: 1.5rem;
+  margin-top: -2px;
+  flex: 1;
+  z-index: 0;
+}
+
+/* Hover: red accent + lift */
+.folder-card:hover .folder-tab {
+  background: var(--signal-red);
+}
+
+.folder-card:hover .folder-tab::after {
+  background: radial-gradient(circle at 0 0, transparent 12px, var(--signal-red) 12px);
+}
+
+.folder-card:hover .folder-body {
   border-color: var(--signal-red);
+  box-shadow:
+    0 8px 24px rgba(255, 59, 48, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   transform: translateY(-4px);
-  box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.08);
 }
 
 /* ==============================
@@ -581,6 +619,142 @@ body {
   vertical-align: text-bottom;
   margin-left: 2px;
   box-shadow: 0 0 4px rgba(var(--card-accent), 0.3);
+}
+
+/* ==============================
+   CONTACT — Channel + Form Terminals
+   ============================== */
+
+/* ── Channel terminal card ── */
+.channel-terminal {
+  --ch-accent: 200, 200, 200;
+  display: block;
+  background: #0d0d0d;
+  border: 1px solid rgba(var(--ch-accent), 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+
+.channel-terminal:hover {
+  border-color: rgba(var(--ch-accent), 0.2);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(var(--ch-accent), 0.06);
+  transform: translateX(4px);
+}
+
+.channel-terminal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #141414;
+  border-bottom: 1px solid rgba(var(--ch-accent), 0.06);
+}
+
+.channel-terminal-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 14px;
+  background: #141414;
+  border-top: 1px solid rgba(var(--ch-accent), 0.06);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  font-family: "Fira Code", "SF Mono", monospace;
+}
+
+/* ── Form terminal ── */
+.form-terminal {
+  position: relative;
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 59, 48, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(255, 59, 48, 0.03);
+  transition: box-shadow 0.4s ease;
+}
+
+.form-terminal:hover {
+  box-shadow:
+    0 8px 36px rgba(0, 0, 0, 0.4),
+    0 0 50px rgba(255, 59, 48, 0.05);
+}
+
+.form-terminal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #141414;
+  border-bottom: 1px solid rgba(255, 59, 48, 0.06);
+}
+
+.form-terminal-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: #141414;
+  border-top: 1px solid rgba(255, 59, 48, 0.06);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  font-family: "Fira Code", "SF Mono", monospace;
+}
+
+/* ── Form input (dark terminal) ── */
+.form-terminal-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 8px 0;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.form-terminal-input:focus {
+  border-bottom-color: rgba(255, 59, 48, 0.4);
+}
+
+.form-terminal-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+}
+
+/* ── Transmit button ── */
+.form-terminal-btn {
+  position: relative;
+  padding: 12px 28px;
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--signal-red);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.form-terminal-btn:hover {
+  border-color: rgba(255, 59, 48, 0.5);
+  color: var(--ivory);
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
 }
 
 /* ==============================
